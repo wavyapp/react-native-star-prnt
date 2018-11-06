@@ -146,25 +146,27 @@ public class RNStarPrntModule extends ReactContextBaseJavaModule {
 
         new Thread(new Runnable() {
             public void run() {
-
-                if (starIoExtManager != null) starIoExtManager.connect(new IConnectionCallback() {
-                    @Override
-                    public void onConnected(ConnectResult connectResult) {
-                        if (connectResult == ConnectResult.Success || connectResult == ConnectResult.AlreadyConnected) {
-
-                            promise.resolve("Printer Connected");
-
-                        } else {
-                            promise.reject("CONNECT_ERROR", "Error Connecting to the printer");
-                        }
+                if (starIoExtManager != null) {
+                    try {
+                        starIoExtManager.connect(new IConnectionCallback() {
+                            @Override
+                            public void onConnected(ConnectResult connectResult) {
+                                if (connectResult == ConnectResult.Success || connectResult == ConnectResult.AlreadyConnected) {    
+                                    promise.resolve("Printer Connected");
+                                } else {
+                                    promise.reject("CONNECT_ERROR", "Error Connecting to the printer");
+                                }
+                            }
+                            @Override
+                            public void onDisconnected() {
+                                //Do nothing
+                            }
+                        });
+                    } catch (NullPointerException e) {
+                        promise.reject("CONNECT_ERROR", "Error Connecting to the printer");
                     }
-
-                    @Override
-                    public void onDisconnected() {
-                        //Do nothing
-                    }
-                });
-
+                }
+                promise.reject("CONNECT_ERROR", "Error Connecting to the printer");
             }
         }).start();
     }
