@@ -289,12 +289,48 @@ RCT_REMAP_METHOD(optimisticPrint, portName:(NSString *)portName
     
 }
 
+
+RCT_REMAP_METHOD(isPriceIndicatorConnected, portName:(NSString *)portName
+                 emulation:(NSString *)emulation
+                 printCommands:(NSArray *) displayCommands
+                 isPriceIndicatorConnectedResolver:(RCTPromiseResolveBlock)resolve
+                 rejecter:(RCTPromiseRejectBlock)reject)
+{
+    ISCPConnectParser *parser = [StarIoExt createDisplayConnectParser:StarIoExtDisplayModelSCD222];
+    // WIP 
+    
+    [Communication parseDoNotCheckCondition:parser port:port completionHandler:^(BOOL result, NSString *title, NSString *message) {
+        if (result == YES) {
+            if (parser.connect == YES) {
+                UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"Check Status" message:@"Display Connect."
+                delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+
+                [alertView show];
+            } else {
+                UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"Check Status" message:@"Display Disconnect."
+                delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+
+                [alertView show];
+            }
+        }
+        else {
+            // UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"Failure" message:@"Display Impossible." delegate:nil
+            cancelButtonTitle:@"OK" otherButtonTitles:nil];
+            UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"Failure" message:@"Printer Impossible." delegate:nil
+            cancelButtonTitle:@"OK" otherButtonTitles:nil];
+
+            [alertView show];
+        }
+    }];
+}
+
 RCT_REMAP_METHOD(showPriceIndicator, portName:(NSString *)portName
                  emulation:(NSString *)emulation
                  printCommands:(NSArray *) displayCommands
                  showPriceIndicatorResolver:(RCTPromiseResolveBlock)resolve
                  rejecter:(RCTPromiseRejectBlock)reject)
 {
+
     NSString *portSettings = [self getPortSettingsOption:emulation];
     
     ISDCBBuilder *builder = [StarIoExt createDisplayCommandBuilder:StarIoExtDisplayModelSCD222];
