@@ -43,6 +43,8 @@ import com.starmicronics.starioextension.ICommandBuilder.CodePageType;
 import com.starmicronics.starioextension.StarIoExtManager;
 import com.starmicronics.starioextension.StarIoExtManagerListener;
 import com.starmicronics.starioextension.IPeripheralConnectParser;
+import com.starmicronics.stario.StarBluetoothManager;
+import com.starmicronics.starioextension.StarBluetoothManagerFactory;
 
 public class RNStarPrntModule extends ReactContextBaseJavaModule {
     private enum PeripheralStatus {
@@ -52,6 +54,9 @@ public class RNStarPrntModule extends ReactContextBaseJavaModule {
     private final ReactApplicationContext reactContext;
     private StarIoExtManager starIoExtManager;
     private PeripheralStatus displayStatus = PeripheralStatus.Invalid;
+    private StarBluetoothManager mBluetoothManager;
+    private StarBluetoothManager.StarBluetoothSecurity mSecurity;
+    private boolean                                    mAutoConnect;
 
     public RNStarPrntModule(ReactApplicationContext reactContext) {
         super(reactContext);
@@ -151,6 +156,19 @@ public class RNStarPrntModule extends ReactContextBaseJavaModule {
                 hasBarcodeReader ? StarIoExtManager.Type.WithBarcodeReader : StarIoExtManager.Type.Standard, portName,
                 portSettings, 10000, context);
         starIoExtManager.setListener(starIoExtManagerListener);
+
+        try {
+            mBluetoothManager = StarBluetoothManagerFactory.getManager(
+                    portName,
+                    portSettings,
+                    10000,
+                    emulation
+            );
+        }
+        catch (StarIOPortException e) {
+            
+        }
+
 
         new Thread(new Runnable() {
             public void run() {
@@ -727,6 +745,20 @@ public class RNStarPrntModule extends ReactContextBaseJavaModule {
             }
             return true;
         }
+    }
+
+    @ReactMethod
+    private boolean sendCommandsDoNotCheckCondition(Boolean autoConnectEnabled, Promise promise) {
+        if (mBluetoothManager.getAutoConnectCapability() == StarBluetoothManager.StarBluetoothSettingCapability.SUPPORT) {
+            mAutoConnect = mBluetoothManager.getAutoConnect();
+            mAutoConnectSwitch.setChecked(mAutoConnect);
+            mAutoConnectSwitch.setEnabled(true);
+        }
+        else {
+            mAutoConnectSwitch.setText("N/A");
+            mAutoConnectSwitch.setEnabled(false);
+        }
+
     }
 
     private void appendCommands(ICommandBuilder builder, ReadableArray printCommands, Context context) {
