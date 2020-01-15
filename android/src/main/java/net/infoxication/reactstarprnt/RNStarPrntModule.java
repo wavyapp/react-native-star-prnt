@@ -126,6 +126,7 @@ public class RNStarPrntModule extends ReactContextBaseJavaModule {
                     json.putBoolean("receiptPaperEmpty", status.receiptPaperEmpty);
                     json.putString("ModelName", firmwareInformationMap.get("ModelName"));
                     json.putString("FirmwareVersion", firmwareInformationMap.get("FirmwareVersion"));
+                    json.putString("autoConnect", mBluetoothManager.getAutoConnect());
                     promise.resolve(json);
                 } catch (StarIOPortException e) {
                     promise.reject("CHECK_STATUS_ERROR", e);
