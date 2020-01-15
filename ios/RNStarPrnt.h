@@ -7,12 +7,15 @@
 #import <StarIO/SMPort.h>
 #import <StarIO_Extension/StarIoExt.h>
 #import <StarIO_Extension/StarIoExtManager.h>
+#import <StarIO_Extension/SMBluetoothManagerFactory.h>
 #import "Communication.h"
 #import <React/RCTEventEmitter.h>
 
 @interface RNStarPrnt : RCTEventEmitter <RCTBridgeModule>
 
 @property (nonatomic) StarIoExtManager *printerManager;
+
+@property (nonatomic) SMBluetoothManager *bluetoothManager;
 
 @end
   
