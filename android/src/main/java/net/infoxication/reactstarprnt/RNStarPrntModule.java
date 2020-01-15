@@ -48,6 +48,7 @@ public class RNStarPrntModule extends ReactContextBaseJavaModule {
     private final ReactApplicationContext reactContext;
     private StarIoExtManager starIoExtManager;
 
+    
     public RNStarPrntModule(ReactApplicationContext reactContext) {
         super(reactContext);
         this.reactContext = reactContext;
