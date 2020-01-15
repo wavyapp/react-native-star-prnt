@@ -42,11 +42,17 @@ import com.starmicronics.starioextension.ICommandBuilder.CutPaperAction;
 import com.starmicronics.starioextension.ICommandBuilder.CodePageType;
 import com.starmicronics.starioextension.StarIoExtManager;
 import com.starmicronics.starioextension.StarIoExtManagerListener;
+import com.starmicronics.stario.StarBluetoothManager;
+import com.starmicronics.starioextension.StarBluetoothManagerFactory;
 
 public class RNStarPrntModule extends ReactContextBaseJavaModule {
 
-    private final ReactApplicationContext reactContext;
-    private StarIoExtManager starIoExtManager;
+    private final ReactApplicationContext               reactContext;
+    private StarIoExtManager                            starIoExtManager;
+    private StarBluetoothManager                        mBluetoothManager;
+    private StarBluetoothManager.StarBluetoothSecurity  mSecurity;
+    private boolean                                     mAutoConnect;
+
 
     public RNStarPrntModule(ReactApplicationContext reactContext) {
         super(reactContext);
@@ -116,6 +122,7 @@ public class RNStarPrntModule extends ReactContextBaseJavaModule {
                     json.putBoolean("receiptPaperEmpty", status.receiptPaperEmpty);
                     json.putString("ModelName", firmwareInformationMap.get("ModelName"));
                     json.putString("FirmwareVersion", firmwareInformationMap.get("FirmwareVersion"));
+                    json.putString("autoConnect", mBluetoothManager.getAutoConnect());
                     promise.resolve(json);
                 } catch (StarIOPortException e) {
                     promise.reject("CHECK_STATUS_ERROR", e);
@@ -143,6 +150,17 @@ public class RNStarPrntModule extends ReactContextBaseJavaModule {
         }
         starIoExtManager = new StarIoExtManager(hasBarcodeReader ? StarIoExtManager.Type.WithBarcodeReader : StarIoExtManager.Type.Standard, portName, portSettings, 10000, context);
         starIoExtManager.setListener(starIoExtManagerListener);
+        try {
+            mBluetoothManager = StarBluetoothManagerFactory.getManager(
+                    portName,
+                    portSettings,
+                    10000,
+                    emulation
+            );
+        }
+        catch (StarIOPortException e) {
+
+        }
 
         new Thread(new Runnable() {
             public void run() {
@@ -360,6 +378,20 @@ public class RNStarPrntModule extends ReactContextBaseJavaModule {
         }
 
     }
+
+    @ReactMethod
+    private boolean setAutoConnect(Boolean autoConnectEnabled, Promise promise) {
+        if (mBluetoothManager.getAutoConnectCapability() == StarBluetoothManager.StarBluetoothSettingCapability.SUPPORT) {
+            mAutoConnect = mBluetoothManager.getAutoConnect();
+            mAutoConnectSwitch.setChecked(mAutoConnect);
+            mAutoConnectSwitch.setEnabled(true);
+            promise.resolve("enabled");
+        } else {
+            mAutoConnectSwitch.setEnabled(false);
+            promise.resolve("disabled");
+        }
+    }
+
 
     private Emulation getEmulation(String emulation) {
         if (emulation == null) {
@@ -654,6 +686,8 @@ public class RNStarPrntModule extends ReactContextBaseJavaModule {
             return true;
         }
     }
+
+
 
     private void appendCommands(ICommandBuilder builder, ReadableArray printCommands, Context context) {
         Charset encoding = Charset.forName("US-ASCII");
