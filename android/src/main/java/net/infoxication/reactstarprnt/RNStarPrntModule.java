@@ -122,7 +122,7 @@ public class RNStarPrntModule extends ReactContextBaseJavaModule {
                     json.putBoolean("receiptPaperEmpty", status.receiptPaperEmpty);
                     json.putString("ModelName", firmwareInformationMap.get("ModelName"));
                     json.putString("FirmwareVersion", firmwareInformationMap.get("FirmwareVersion"));
-                    json.putString("autoConnect", mBluetoothManager.getAutoConnect());
+                    json.putString("autoConnect", String.valueOf(mBluetoothManager.getAutoConnect()));
                     promise.resolve(json);
                 } catch (StarIOPortException e) {
                     promise.reject("CHECK_STATUS_ERROR", e);
@@ -380,15 +380,13 @@ public class RNStarPrntModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    private boolean setAutoConnect(Boolean autoConnectEnabled, Promise promise) {
+    private void setAutoConnect(Boolean autoConnectEnabled, Promise promise) {
         if (mBluetoothManager.getAutoConnectCapability() == StarBluetoothManager.StarBluetoothSettingCapability.SUPPORT) {
+            mBluetoothManager.setAutoConnect(autoConnectEnabled);
             mAutoConnect = mBluetoothManager.getAutoConnect();
-            mAutoConnectSwitch.setChecked(mAutoConnect);
-            mAutoConnectSwitch.setEnabled(true);
-            promise.resolve("enabled");
+            promise.resolve(mAutoConnect);
         } else {
-            mAutoConnectSwitch.setEnabled(false);
-            promise.resolve("disabled");
+            promise.resolve("nosupport");
         }
     }
 
