@@ -155,7 +155,7 @@ public class RNStarPrntModule extends ReactContextBaseJavaModule {
                     portName,
                     portSettings,
                     10000,
-                    emulation
+                    getEmulation(emulation)
             );
         }
         catch (StarIOPortException e) {
