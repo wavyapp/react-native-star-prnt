@@ -381,7 +381,7 @@ public class RNStarPrntModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     private void setAutoConnect(Boolean autoConnectEnabled, Promise promise) {
-        if (mBluetoothManager.getAutoConnectCapability() == StarBluetoothManager.StarBluetoothSettingCapability.SUPPORT) {
+        if (mBluetoothManager != null && mBluetoothManager.getAutoConnectCapability() == StarBluetoothManager.StarBluetoothSettingCapability.SUPPORT) {
             mBluetoothManager.setAutoConnect(autoConnectEnabled);
             mAutoConnect = mBluetoothManager.getAutoConnect();
             promise.resolve(mAutoConnect);
