@@ -12,8 +12,6 @@
 #import <StarIO_Extension/StarIoExtManager.h>
 #import "Communication.h"
 
-@property (nonatomic) SMBluetoothManager *bluetoothManager;
-
 
 @implementation RNStarPrnt
 
@@ -146,8 +144,9 @@ RCT_REMAP_METHOD(connect, portName:(NSString *)portName
                  connectWithResolver:(RCTPromiseResolveBlock)resolve
                  rejecter:(RCTPromiseRejectBlock)reject)
 {
-        self.bluetoothManager = [SMBluetoothManagerFactory getManager:portName emulation:emulation];
-        self.bluetoothManager.autoConnect = on
+        StarIoExtEmulation Emulation = [self getEmulation:emulation];
+        self.bluetoothManager = [SMBluetoothManagerFactory getManager:portName emulation:Emulation];
+        self.bluetoothManager.autoConnect = YES;
 
         NSString *portSettings = [self getPortSettingsOption:emulation];
         if (_printerManager == nil) {
@@ -735,6 +734,9 @@ RCT_REMAP_METHOD(print, portName:(NSString *)portName
     [dict setObject:[NSNumber numberWithBool:status.cutterError == SM_TRUE] forKey:@"cutterError"];
     [dict setObject:[NSNumber numberWithBool:status.receiptPaperEmpty == SM_TRUE] forKey:@"receiptPaperEmpty"];
     [dict addEntriesFromDictionary:firmwareInformation];
+
+    // TODO TEST
+    [dict setObject:[NSNumber numberWithBool:self.bluetoothManager.autoConnect == SM_TRUE] forKey:@"autoConnect"];
     
     return dict;
 }
