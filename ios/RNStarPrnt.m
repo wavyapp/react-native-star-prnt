@@ -17,14 +17,14 @@
 
  bool RNStarPrnt_hasListeners;
 
-+ (BOOL)requiresMainQueueSetup
-{
-    return YES;
-}
-
 - (dispatch_queue_t)methodQueue
 {
     return dispatch_queue_create("net.infoxication.react.starprnt", DISPATCH_QUEUE_SERIAL);
+}
+
++ (BOOL)requiresMainQueueSetup
+{
+    return YES;
 }
 RCT_EXPORT_MODULE();
 
@@ -875,8 +875,15 @@ RCT_REMAP_METHOD(print, portName:(NSString *)portName
             BOOL diffusion = ([[command valueForKey:@"diffusion"] boolValue] == NO) ? NO : YES;
             BOOL bothScale = ([[command valueForKey:@"bothScale"] boolValue]  == NO) ? NO : YES;
             SCBBitmapConverterRotation rotation = [self getBitmapConverterRotation:[command valueForKey:@"rotation"]];
+            NSError *error = nil;
             NSURL *imageURL = [NSURL URLWithString:urlString];
-            NSData *imageData = [NSData dataWithContentsOfURL:imageURL];
+            NSData *imageData = [NSData dataWithContentsOfURL:imageURL options:NSDataReadingUncached error:&error];
+
+            if (error != nil) {
+                NSURL *fileImageURL = [NSURL fileURLWithPath:urlString];
+                imageData = [NSData dataWithContentsOfURL:fileImageURL];
+            }
+
             UIImage *image = [UIImage imageWithData:imageData];
             
             if([command valueForKey:@"absolutePosition"]){
@@ -894,11 +901,17 @@ RCT_REMAP_METHOD(print, portName:(NSString *)portName
             NSInteger width = ([command valueForKey:@"width"]) ? [[command valueForKey:@"width"] intValue] : 576;
             NSString *fontName = ([command valueForKey:@"font"]) ? [command valueForKey:@"font"] : @"Menlo";
             NSInteger fontSize = ([command valueForKey:@"fontSize"]) ? [[command valueForKey:@"fontSize"] intValue] : 12;
+            BOOL bothScale = ([[command valueForKey:@"bothScale"] boolValue]  == NO) ? NO : YES;
+            SCBBitmapConverterRotation rotation = SCBBitmapConverterRotationNormal;
 
             UIFont *font = [UIFont fontWithName:fontName size:fontSize * 2];
             UIImage *image = [self imageWithString:text font:font width:width];
 
-            [builder appendBitmap:image diffusion:NO];
+            if ([command valueForKey:@"alignment"]){
+                SCBAlignmentPosition alignment = [self getAlignment:[command valueForKey:@"alignment"]];
+                [builder appendBitmapWithAlignment:image diffusion:NO width:width bothScale:bothScale rotation:rotation position:alignment];
+            }
+            else [builder appendBitmap:image diffusion:NO];
         }
     }
     
