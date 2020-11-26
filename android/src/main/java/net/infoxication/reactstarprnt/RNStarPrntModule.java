@@ -5,6 +5,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.Build;
 import android.provider.MediaStore;
 import android.util.Log;
 
@@ -426,12 +427,16 @@ public class RNStarPrntModule extends ReactContextBaseJavaModule {
             arrayDiscovery.addAll(TCPPortList);
         }
         if (interfaceName.equals("USB") || interfaceName.equals("All")) {
-            try {
-                USBPortList = StarIOPort.searchPrinter("USB:", getReactApplicationContext());
-            } catch (StarIOPortException e) {
-                USBPortList = new ArrayList<PortInfo>();
+            // On Android Q and up, we need permissions in order to access usb devices
+            // this is a temporary fix while we work out to upgrade our dependency
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+                try {
+                    USBPortList = StarIOPort.searchPrinter("USB:", getReactApplicationContext());
+                } catch (StarIOPortException e) {
+                    USBPortList = new ArrayList<PortInfo>();
+                }
+                arrayDiscovery.addAll(USBPortList);
             }
-            arrayDiscovery.addAll(USBPortList);
         }
 
         for (PortInfo discovery : arrayDiscovery) {
