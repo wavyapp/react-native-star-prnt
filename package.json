@@ -1,6 +1,6 @@
 {
   "name": "@wavyapp/react-native-star-prnt",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "StarPRNT React Native bridge for Star Micronics Bluetooth/LAN printers",
   "types": "./types/index.d.ts",
   "main": "index.js",
@@ -27,6 +27,6 @@
   "author": "Ruben Casas",
   "license": "MIT",
   "peerDependencies": {
-    "react-native": "^0.41.2"
+    "react-native": "^0.63.5"
   }
 }
