@@ -101,16 +101,6 @@
         break;
       }
       
-      // StarPrinterStatus_2 printerStatus;
-      
-      // [port getParsedStatus:&printerStatus :2];
-      
-      //          if (printerStatus.offline == SM_TRUE) {     // Do not check condition.
-      //              title   = @"Printer Error";
-      //              message = @"Printer is offline (GetParsedStatus)";
-      //              break;
-      //          }
-      
       NSDate *startDate = [NSDate date];
       
       uint32_t total = 0;
@@ -130,14 +120,6 @@
       if (total < (uint32_t) commands.length) {
         break;
       }
-      
-      // [port getParsedStatus:&printerStatus :2];
-      
-      //          if (printerStatus.offline == SM_TRUE) {     // Do not check condition.
-      //              title   = @"Printer Error";
-      //              message = @"Printer is offline (GetParsedStatus)";
-      //              break;
-      //          }
       
       title   = @"Send Commands";
       message = @"Success";

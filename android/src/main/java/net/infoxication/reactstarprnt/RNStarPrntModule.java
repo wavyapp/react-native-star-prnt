@@ -166,7 +166,7 @@ public class RNStarPrntModule extends ReactContextBaseJavaModule {
 
     @Override
     public void onBarcodeDataReceive(byte[] data) {
-      sendEvent("barcodeDataReceive", new String(data));
+      sendEvent("barcodeReaderDataReceive", new String(data));
     }
   };
   private final LinkedHashMap<String, ThreadedPromises> portDiscoveryThreadPool = new LinkedHashMap<>();
@@ -1280,7 +1280,9 @@ public class RNStarPrntModule extends ReactContextBaseJavaModule {
     String eventName = "starPrntData";
     WritableMap params = new WritableNativeMap();
     params.putString("dataType", dataType);
-    if (info != null) params.putString("data", info);
+    if (info != null) {
+      params.putString("data", info);
+    }
     reactContext
             .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
             .emit(eventName, params);

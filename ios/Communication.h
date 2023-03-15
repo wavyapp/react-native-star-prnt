@@ -8,9 +8,9 @@
 
 #import <Foundation/Foundation.h>
 
-#import <StarIO/SMPort.h>
+#import "StarIO/SMPort.h"
 
-#import <StarIO_Extension/ISCPParser.h>
+#import "StarIO_Extension/ISCPParser.h"
 
 typedef void (^SendCompletionHandler)(BOOL result, NSString *title, NSString *message);
 
