@@ -27,6 +27,6 @@
   "author": "Ruben Casas",
   "license": "MIT",
   "peerDependencies": {
-    "react-native": "^0.63.5"
+    "react-native": "^0.73.0"
   }
 }

@@ -1,47 +1,49 @@
 
 buildscript {
-    repositories {
-        mavenCentral()
-        google()
-    }
+  ext {
+    kotlin_version = '1.9.22'
+  }
+  repositories {
+    mavenCentral()
+    google()
+  }
 
-    dependencies {
-        classpath 'com.android.tools.build:gradle:7.3.0'
-    }
+  dependencies {
+    classpath 'com.android.tools.build:gradle:8.2.2'
+    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+  }
 }
 
 apply plugin: 'com.android.library'
+apply plugin: 'org.jetbrains.kotlin.android'
 
 android {
-    compileSdkVersion 33
-    buildToolsVersion '33.0.0'
-    defaultConfig {
-        minSdkVersion 23
-        targetSdkVersion 33
-        versionCode 1
-        versionName "1.0"
-    }
-    lintOptions {
-        abortOnError false
-    }
+  namespace 'fr.wavyapp.reactNativeStarPrinter'
+  defaultConfig {
+    minSdkVersion 24
+    compileSdk 34
+    targetSdkVersion 34
+    versionCode 2
+    versionName "2.1.1"
+  }
+  lintOptions {
+    abortOnError false
+  }
 }
 
 repositories {
-    mavenCentral()
-    google()
+  mavenCentral()
+  google()
 }
 
 dependencies {
-    def core_version = "1.9.0"
-    def activity_version = "1.6.1"
-    def fragment_version = "1.5.5"
-    def appcompat_version = "1.6.1"
-    implementation files('libs/StarIOPort3.1.jar')
-    implementation files('libs/starioextension.jar')
-    implementation 'com.facebook.react:react-native:+'
-    implementation 'com.google.zxing:core:3.2.1'
-    implementation "androidx.core:core:$core_version"
-    implementation "androidx.activity:activity:$activity_version"
-    implementation "androidx.fragment:fragment:$fragment_version"
-    implementation "androidx.appcompat:appcompat:$appcompat_version"
+  implementation files('libs/StarIOPort3.1.jar')
+  implementation files('libs/starioextension.jar')
+  implementation 'com.facebook.react:react-android:+'
+  implementation 'com.google.zxing:core:3.5.3'
+  implementation "androidx.core:core:1.12.0"
+  implementation "androidx.activity:activity:1.8.2"
+  implementation "androidx.fragment:fragment:1.6.2"
+  implementation "androidx.appcompat:appcompat:1.6.1"
+  implementation 'androidx.core:core-ktx:1.12.0'
 }

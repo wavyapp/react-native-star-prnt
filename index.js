@@ -1,11 +1,25 @@
 
 import { NativeEventEmitter, NativeModules } from 'react-native';
 
-const { RNStarPrnt } = NativeModules;
+const LINKING_ERROR =
+  `The package 'react-native-star-printer' doesn't seem to be linked. Make sure: \n\n` +
+  Platform.select({ ios: "- You have run 'pod install'\n", default: '' }) +
+  '- You rebuilt the app after installing the package\n';
+
+const ReactNativeStarPrinter = NativeModules.ReactNativeStarPrinter
+  ? NativeModules.ReactNativeStarPrinter
+  : new Proxy(
+    {},
+    {
+      get() {
+        throw new Error(LINKING_ERROR);
+      },
+    }
+  );
 
 export class StarPRNT {
 
-  static StarPRNTManagerEmitter = new NativeEventEmitter(RNStarPrnt);
+  static StarPRNTManagerEmitter = new NativeEventEmitter(ReactNativeStarPrinter);
 
   /**
   * Constant for Emulation
@@ -212,7 +226,7 @@ export class StarPRNT {
    * @return {Promise<Printers>} Returns a promise that resolves with an array of printers
    */
   static portDiscovery(type) {
-    return RNStarPrnt.portDiscovery(type);
+    return ReactNativeStarPrinter.portDiscovery(type);
   }
 
   /**
@@ -222,7 +236,7 @@ export class StarPRNT {
    * @return {Promise<PrinterStatus>} Returns a promise that resolves with the printer status object
    */
   static checkStatus(port, emulation) {
-    return RNStarPrnt.checkStatus(port, emulation);
+    return ReactNativeStarPrinter.checkStatus(port, emulation);
   }
   /**
    * Allows you to connect to the printer, keep the connection alive and receive status updates through an observable
@@ -233,7 +247,7 @@ export class StarPRNT {
    */
   static connect(port, emulation, hasBarcodeReader) {
     hasBarcodeReader = (hasBarcodeReader) ? true : false;
-    return RNStarPrnt.connect(port, emulation, hasBarcodeReader);
+    return ReactNativeStarPrinter.connect(port, emulation, hasBarcodeReader);
   }
 
   /**
@@ -242,7 +256,7 @@ export class StarPRNT {
    * @return {Promise<any>} Success! if connected or error message string returned by the SDK.
    */
   static disconnect() {
-    return RNStarPrnt.disconnect();
+    return ReactNativeStarPrinter.disconnect();
   }
 
   /**
@@ -253,19 +267,19 @@ export class StarPRNT {
  * @return {Promise<any>} Success! if printed correctly or error message string returned by the SDK.
  */
   static print(emulation, commandsArray, port) {
-    return RNStarPrnt.print(port, emulation, commandsArray);
+    return ReactNativeStarPrinter.print(port, emulation, commandsArray);
   }
 
   static showPriceIndicator(emulation, commandsArray, port) {
-    return RNStarPrnt.showPriceIndicator(port, emulation, commandsArray);
+    return ReactNativeStarPrinter.showPriceIndicator(port, emulation, commandsArray);
   }
 
   static cleanCustomerDisplay(emulation, commandsArray, port) {
-    return RNStarPrnt.cleanCustomerDisplay(port, emulation, commandsArray);
+    return ReactNativeStarPrinter.cleanCustomerDisplay(port, emulation, commandsArray);
   }
 
   static turnCustomerDisplay(turnTo, emulation, commandsArray, port) {
-    return RNStarPrnt.turnCustomerDisplay(turnTo, port, emulation, commandsArray);
+    return ReactNativeStarPrinter.turnCustomerDisplay(turnTo, port, emulation, commandsArray);
   }
 
 
@@ -277,6 +291,10 @@ export class StarPRNT {
  * @return {Promise<any>} Success! if printed correctly or error message string returned by the SDK.
  */
   static optimisticPrint(emulation, commandsArray, port) {
-    return RNStarPrnt.optimisticPrint(port, emulation, commandsArray);
+    return ReactNativeStarPrinter.optimisticPrint(port, emulation, commandsArray);
+  }
+
+  static setAutoConnect(autoConnectEnabled) {
+    return ReactNativeStarPrinter.setAutoConnect(autoConnectEnabled);
   }
 }
