@@ -8,8 +8,8 @@
 
 #import "ReactNativeStarPrnt.h"
 #import "Communication.h"
-#import <StarIO_Extension/StarIoExt.h>
-#import <StarIO_Extension/StarIoExtManager.h>
+#import "StarIO_Extension/StarIoExt.h"
+#import "StarIO_Extension/StarIoExtManager.h"
 
 @implementation ReactNativeStarPrinter
 

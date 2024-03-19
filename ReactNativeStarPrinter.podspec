@@ -14,11 +14,9 @@ Pod::Spec.new do |s|
   s.platforms     = { :ios => "12.3" }
   s.source       = { :git => "https://github.com/wavyapp/react-native-star-prnt.git", :tag => "v#{s.version}" }
   s.source_files  = "ios/**/*.{h,m}"
-  # s.requires_arc = true
+  s.vendored_frameworks = "./ios/frameworks/StarIO.xcframework", "./ios/frameworks/StarIO_Extension.xcframework"
+  s.public_header_files = "./ios/frameworks/StarIO.xcframework/**/Headers/*", "./ios/frameworks/StarIO_Extension.xcframework/**/Headers/*"
 
-  s.dependency "StarIO", "2.10.0"
-  s.dependency "StarIO_Extension", "1.14.0"
-  # s.dependency "StarIODeviceSetting", "~> 1.0.2"
   # Use install_modules_dependencies helper to install the dependencies if React Native version >=0.71.0.
   # See https://github.com/facebook/react-native/blob/febf6b7f33fdb4904669f99d795eba4c0f95d7bf/scripts/cocoapods/new_architecture.rb#L79.
   if respond_to?(:install_modules_dependencies, true)

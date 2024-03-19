@@ -3,10 +3,10 @@
 #else
 #import <React/RCTBridgeModule.h>
 #endif
-#import <StarIO/SMPort.h>
-#import <StarIO_Extension/StarIoExt.h>
-#import <StarIO_Extension/StarIoExtManager.h>
-#import <StarIO_Extension/SMBluetoothManagerFactory.h>
+#import "StarIO/SMPort.h"
+#import "StarIO_Extension/StarIoExt.h"
+#import "StarIO_Extension/StarIoExtManager.h"
+#import "StarIO_Extension/SMBluetoothManagerFactory.h"
 #import "Communication.h"
 #import <React/RCTEventEmitter.h>
 
