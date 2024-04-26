@@ -6,8 +6,6 @@
 //
 
 #import <Foundation/Foundation.h>
-#ifndef star_IO_10_error
-#define star_IO_10_error
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -34,5 +32,3 @@ extern NSString * const STARIO10ErrorStatusKey;
 @end
 
 NS_ASSUME_NONNULL_END
-
-#endif

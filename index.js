@@ -1,5 +1,5 @@
 
-import { NativeEventEmitter, NativeModules } from 'react-native';
+import { NativeEventEmitter, NativeModules, Platform } from 'react-native';
 
 const LINKING_ERROR =
   `The package 'react-native-star-printer' doesn't seem to be linked. Make sure: \n\n` +
@@ -16,6 +16,91 @@ const ReactNativeStarPrinter = NativeModules.ReactNativeStarPrinter
       },
     }
   );
+
+export const PrinterOpenErrorCodes = {
+  PRINTER_OPEN_INVALID_OPERATION: 'PRINTER_OPEN_INVALID_OPERATION',
+  PRINTER_OPEN_COMMUNICATION_ERROR: 'PRINTER_OPEN_COMMUNICATION_ERROR',
+  PRINTER_OPEN_PRINTER_IN_USE: 'PRINTER_OPEN_PRINTER_IN_USE',
+  PRINTER_OPEN_PRINTER_NOT_FOUND: 'PRINTER_OPEN_PRINTER_NOT_FOUND',
+  PRINTER_OPEN_IDENTIFIER_FORMAT_INVALID: 'PRINTER_OPEN_IDENTIFIER_FORMAT_INVALID',
+  PRINTER_OPEN_INVALID_RESPONSE_FROM_PRINTER: 'PRINTER_OPEN_INVALID_RESPONSE_FROM_PRINTER',
+  PRINTER_OPEN_BLUETOOTH_UNAVAILABLE: 'PRINTER_OPEN_BLUETOOTH_UNAVAILABLE',
+  PRINTER_OPEN_ILLEGAL_DEVICE_STATE: 'PRINTER_OPEN_ILLEGAL_DEVICE_STATE',
+  PRINTER_OPEN_UNSUPPORTED_MODEL: 'PRINTER_OPEN_UNSUPPORTED_MODEL',
+};
+
+export const PrinterGetStatusErrorCodes = {
+  PRINTER_GET_STATUS_INVALID_OPERATION: 'PRINTER_GET_STATUS_INVALID_OPERATION', // Not connected to printer
+  PRINTER_GET_STATUS_COMMUNICATION_ERROR: 'PRINTER_GET_STATUS_COMMUNICATION_ERROR',
+  PRINTER_GET_STATUS_INVALID_RESPONSE_FROM_PRINTER: 'PRINTER_GET_STATUS_INVALID_RESPONSE_FROM_PRINTER',
+  PRINTER_GET_STATUS_NO_PRINTER_CONNECTION: 'PRINTER_GET_STATUS_NO_PRINTER_CONNECTION',
+};
+
+export const PrintDataType = {
+  text: "text",
+  image: "image",
+  barcode: "barcode",
+};
+
+export const Align = {
+  center: "center",
+  left: "left",
+  right: "right",
+};
+
+export const PrintAction = {
+  cut: "cut",
+  partialCut: "partial-cut",
+  fullDirect: "full-direct",
+  partialDirect: "partial-direct",
+};
+
+export const InternationalCharacterType ={
+  usa: "usa",
+  france: "france",
+  germany: "germany",
+  uk: "uk",
+  denmark: "denmark",
+  sweden: "sweden",
+  italy: "italy",
+  spain: "spain",
+  japan: "japan",
+  norway: "norway",
+  denmark2: "denmark2",
+  spain2: "spain2",
+  latinAmerica: "latinAmerica",
+  korea: "korea",
+  ireland: "ireland",
+  slovenia: "slovenia",
+  croatia: "croatia",
+  china: "china",
+  vietnam: "vietnam",
+  arabic: "arabic",
+  legal: "legal",
+};
+
+export const DisplayInternationalCharacterType = {
+  usa: "usa",
+  france: "france",
+  germany: "germany",
+  uk: "uk",
+  denmark: "denmark",
+  sweden: "sweden",
+  italy: "italy",
+  spain: "spain",
+  japan: "japan",
+  norway: "norway",
+  denmark2: "denmark2",
+  spain2: "spain2",
+  latinAmerica: "latinAmerica",
+  korea: "korea",
+};
+
+export const DisplayCursorState = {
+  ON: "on",
+  OFF: "off",
+  BLINK: "blink",
+};
 
 export class StarPRNT {
 
@@ -246,6 +331,16 @@ export class StarPRNT {
    * @return {Observable<any>} Success! if connected or error message string returned by the SDK.
    */
   static connect(port, emulation, hasBarcodeReader) {
+    /**
+     * iOS uses the new SDK StarXPAND
+     * @param {string} port -> identifier Device identifier obtained with the `searchPrinter` method
+     * @param {InterfaceType} emulation -> interfaceType Interface to use to connect to the device
+     */
+    if (Platform.OS === 'ios') {
+      const identifier = port;
+      const interfaceType = emulation;
+      return ReactNativeStarPrinter.connect(identifier, interfaceType);
+    }
     hasBarcodeReader = (hasBarcodeReader) ? true : false;
     return ReactNativeStarPrinter.connect(port, emulation, hasBarcodeReader);
   }
@@ -282,7 +377,6 @@ export class StarPRNT {
     return ReactNativeStarPrinter.turnCustomerDisplay(turnTo, port, emulation, commandsArray);
   }
 
-
   /**
  * Same as print, but don't perform a checkStatus before and after print
  * @param {string} emulation  StarPrinter Emulation type: "StarPRNT", "StarPRNTL", "StarLine", "StarGraphic", "EscPos", "EscPosMobile", "StarDotImpact"
@@ -296,5 +390,40 @@ export class StarPRNT {
 
   static setAutoConnect(autoConnectEnabled) {
     return ReactNativeStarPrinter.setAutoConnect(autoConnectEnabled);
+  }
+
+  // iOS only uses the new SDK StarXPAND
+  static searchPrinter() {
+    return ReactNativeStarPrinter.searchPrinter();
+  }
+
+  // iOS only uses the new SDK StarXPAND
+  /**
+   * Get the status of the printer currently the device is connected to
+   */
+  static getStatus() {
+    return ReactNativeStarPrinter.getStatus();
+  }
+
+  // iOS only uses the new SDK StarXPAND
+  /**
+   * Opens the printer cash drawer
+   */
+  static openCashDrawer() {
+    return ReactNativeStarPrinter.openCashDrawer();
+  }
+
+  // iOS only uses the new SDK StarXPAND
+  static printiOS(commands, internationalCharacterType) {
+    return ReactNativeStarPrinter.print(commands, internationalCharacterType);
+  }
+  // iOS only uses the new SDK StarXPAND
+  static displayText(content, backlight = true, contrast = 0, cursorState = 'off', internationalCharacterType = 'usa')  {
+    return ReactNativeStarPrinter.showTextOnDisplay(content, backlight, contrast, cursorState, internationalCharacterType);
+  }
+
+  // iOS only
+  static clearDisplay() {
+    return ReactNativeStarPrinter.clearDisplay();
   }
 }

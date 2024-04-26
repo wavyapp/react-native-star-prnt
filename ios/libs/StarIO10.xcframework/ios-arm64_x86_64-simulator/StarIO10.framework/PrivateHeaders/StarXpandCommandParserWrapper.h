@@ -7,9 +7,6 @@
 
 #import <Foundation/Foundation.h>
 
-#ifndef star_xpand_command_parser_wrapper
-#define star_xpand_command_parser_wrapper
-
 NS_ASSUME_NONNULL_BEGIN
 
 @interface StarXpandCommandParserWrapper : NSObject
@@ -26,4 +23,3 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 NS_ASSUME_NONNULL_END
-#endif

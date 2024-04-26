@@ -5,8 +5,6 @@
 //  Copyright 2021 Star Micronics Co., Ltd. All rights reserved.
 //
 
-#ifndef star_IO_10
-#define star_IO_10
 #import <Foundation/Foundation.h>
 
 //! Project version number for StarIO10.
@@ -19,4 +17,4 @@ FOUNDATION_EXPORT const unsigned char StarIO10VersionString[];
 
 #import <StarIO10/StarIO10Error.h>
 #import <StarIO10/StarConnectionSettings.h>
-#endif
+

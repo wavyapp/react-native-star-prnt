@@ -225,7 +225,13 @@ declare class StarPRNT {
    * @param {boolean} hasBarcodeReader If device has an attached barcode reader i.e mPOP
    * @return {Promise<any>} Success! if connected or error message string returned by the SDK.
    */
-  static connect: (port: string, emulation: string, hasBarcodeReader: boolean) => Promise<any>;
+  static connect: (port: string, emulation: string, hasBarcodeReader?: boolean) => Promise<any>;
+  /**
+  * iOS only uses the new SDK StarXPAND
+  * @param {string} identifier Device identifier obtained with the `searchPrinter` method
+  * @param {InterfaceType} interface Interface to use to connect to the device
+  */
+  static connect: (identifier: string, interface: InterfaceType) => Promise<unknown>;
 
   /**
    * Allows to disconnect (close the connection to the peripherals), this is useful to avoid keeping alive a connection when not in the app to save device battery
@@ -235,13 +241,27 @@ declare class StarPRNT {
   static disconnect: () => Promise<any>;
 
   /**
- * Sends an Array of commands to the command buffer using the Android ICommandBuilderInterface or iOS ISCBBuilderInterface
+ * Sends an Array of commands to the command buffer using the Android ICommandBuilderInterface
  * @param {string} emulation  StarPrinter Emulation type: "StarPRNT", "StarPRNTL", "StarLine", "StarGraphic", "EscPos", "EscPosMobile", "StarDotImpact"
  * @param {CommandsArray} commandsArray  each command in the array should be an instance of the PrintCommand object. Example [{append:"text"}, {"openCashDrawer: 1"}]
  * * @param {string} port Optional. printer name i.e BT:StarMicronics. If not set, a printer connected via StarIOExtManager using the connect() function will be used.
  * @return {Promise<any>} Success! if printed correctly or error message string returned by the SDK.
  */
   static print: (emulation: string, commandsArray: CommandsArray, port?: string) => Promise<any>;
+
+  // iOS only
+  static printiOS: (commands: iOSPrintCommand[], internationalCharacterType?: PrintInternationalCharacterType) => Promise<boolean>;
+
+  // iOS only
+  static searchPrinter: () => Promise<FoundPrinter>;
+  // iOS only
+  static getStatus: () => Promise<Status>;
+  // iOS only
+  static openCashDrawer: () => Promise<boolean>;
+  // iOS only
+  static displayText: (content: String, backlight?: boolean, contrast?: number, cursorState?: DisplayCursorState, internationalCharacterType?: DisplayInternationalCharacterType) => Promise<boolean>;
+  // iOS only
+  static clearDisplay: () => promise<boolean>;
 }
 
 export enum PrinterEvent {
@@ -808,3 +828,143 @@ export declare enum BitmapConverterRotation {
  * Push a new PrintCommand object to the array for a separate instruction to the printer. Example [{append:"text"}, {"openCashDrawer: 1"}]
  */
 export type CommandsArray = PrintCommand[];
+
+export enum InterfaceType {
+  BLUETOOTH = 'bluetooth',
+  BLE = 'BLE',
+  LAN = 'lan',
+  USB = 'usb',
+  unknown = 'unknown',
+};
+
+export type FoundPrinter = {
+  "connection-settings": {
+    identifier: string; 
+    interface: InterfaceType
+  };
+  information: {
+    emulation: string;
+    model: string;
+  };
+};
+
+export declare enum PrinterOpenErrorCodes {
+  PRINTER_OPEN_INVALID_OPERATION = 'PRINTER_OPEN_INVALID_OPERATION',
+  PRINTER_OPEN_COMMUNICATION_ERROR = 'PRINTER_OPEN_COMMUNICATION_ERROR',
+  PRINTER_OPEN_PRINTER_IN_USE = 'PRINTER_OPEN_PRINTER_IN_USE',
+  PRINTER_OPEN_PRINTER_NOT_FOUND = 'PRINTER_OPEN_PRINTER_NOT_FOUND',
+  PRINTER_OPEN_IDENTIFIER_FORMAT_INVALID = 'PRINTER_OPEN_IDENTIFIER_FORMAT_INVALID',
+  PRINTER_OPEN_INVALID_RESPONSE_FROM_PRINTER = 'PRINTER_OPEN_INVALID_RESPONSE_FROM_PRINTER',
+  PRINTER_OPEN_BLUETOOTH_UNAVAILABLE = 'PRINTER_OPEN_BLUETOOTH_UNAVAILABLE',
+  PRINTER_OPEN_ILLEGAL_DEVICE_STATE = 'PRINTER_OPEN_ILLEGAL_DEVICE_STATE',
+  PRINTER_OPEN_UNSUPPORTED_MODEL = 'PRINTER_OPEN_UNSUPPORTED_MODEL',
+};
+
+export type Status = {
+  coverOpen: boolean;
+  cutterError: boolean;
+  detectedPaperWidth: number | null;
+  drawerOpenCloseSignal: boolean;
+  drawerOpenError: boolean;
+  hasError: boolean;
+  paperEmpty: boolean;
+  paperJamError: boolean;
+  paperNearEmpty: boolean;
+  paperPresent: boolean;
+  paperSeparatorError: boolean;
+  printUnitOpen: boolean;
+  rollPositionError: boolean;
+};
+
+export declare enum PrinterGetStatusErrorCodes {
+  PRINTER_GET_STATUS_INVALID_OPERATION = 'PRINTER_GET_STATUS_INVALID_OPERATION', // Not connected to printer
+  PRINTER_GET_STATUS_COMMUNICATION_ERROR = 'PRINTER_GET_STATUS_COMMUNICATION_ERROR',
+  PRINTER_GET_STATUS_INVALID_RESPONSE_FROM_PRINTER = 'PRINTER_GET_STATUS_INVALID_RESPONSE_FROM_PRINTER',
+  PRINTER_GET_STATUS_NO_PRINTER_CONNECTION = 'PRINTER_GET_STATUS_NO_PRINTER_CONNECTION',
+};
+
+export declare enum PrintDataType {
+  text = "text",
+  image = "image",
+  barcode = "barcode",
+};
+
+export declare enum Align {
+  center = "center",
+  left = "left",
+  right = "right",
+};
+
+export type Style = {
+  align?: Align;
+  barWidth?: number; // Width of barcode bars in dots
+  bold?: boolean;
+  diffusion?: boolean; // Use diffusion effect
+  heightExpansion?: number;
+  height?: number;
+  threshold?: number; // Image binarization threshold
+  underlined?: boolean;
+  width?: number; // Image width in dots
+  widthExpansion?: number;
+};
+
+export type iOSPrintCommand = {
+  action?: PrintAction;
+  data?: string;
+  style?: Style;
+  type?: PrintDataType;
+};
+
+export declare enum PrintAction {
+  cut = "cut",
+  partialCut = "partial-cut",
+  fullDirect = "full-direct", // Full cut without paper feed
+  partialDirect = "partial-direct", // Partial cut without paper feed
+};
+
+export declare enum PrintInternationalCharacterType {
+  usa = "usa",
+  france = "france",
+  germany = "germany",
+  uk = "uk",
+  denmark = "denmark",
+  sweden = "sweden",
+  italy = "italy",
+  spain = "spain",
+  japan = "japan",
+  norway = "norway",
+  denmark2 = "denmark2",
+  spain2 = "spain2",
+  latinAmerica = "latinAmerica",
+  korea = "korea",
+  ireland = "ireland",
+  slovenia = "slovenia",
+  croatia = "croatia",
+  china = "china",
+  vietnam = "vietnam",
+  arabic = "arabic",
+  legal = "legal",
+};
+
+export declare enum DisplayInternationalCharacterType {
+  usa = "usa",
+  france = "france",
+  germany = "germany",
+  uk = "uk",
+  denmark = "denmark",
+  sweden = "sweden",
+  italy = "italy",
+  spain = "spain",
+  japan = "japan",
+  norway = "norway",
+  denmark2 = "denmark2",
+  spain2 = "spain2",
+  latinAmerica = "latinAmerica",
+  korea = "korea",
+};
+
+export declare enum DisplayCursorState {
+  ON = "on",
+  OFF = "off",
+  BLINK = "blink",
+};

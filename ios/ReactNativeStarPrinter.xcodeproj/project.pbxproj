@@ -7,9 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E052C54A2BCD707A00B98CA3 /* StarIO10 in Frameworks */ = {isa = PBXBuildFile; productRef = E052C5492BCD707A00B98CA3 /* StarIO10 */; };
 		E0DA42DD2BBC47E000F82D2D /* ReactNativeStarPrinter.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0DA42DC2BBC47E000F82D2D /* ReactNativeStarPrinter.swift */; };
 		E0DA42E52BBD4AD900F82D2D /* ReactNativeStarPrinterBridge.m in Sources */ = {isa = PBXBuildFile; fileRef = E0DA42E42BBD4AD900F82D2D /* ReactNativeStarPrinterBridge.m */; };
-		E0E63C152BC43A7C00333CA3 /* StarIO10.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = E0E63C142BC43A7C00333CA3 /* StarIO10.xcframework */; };
+		E0E63D142BC692EA00333CA3 /* StarIO10.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = E0E63D132BC692EA00333CA3 /* StarIO10.xcframework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -29,7 +30,7 @@
 		E0DA42DC2BBC47E000F82D2D /* ReactNativeStarPrinter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReactNativeStarPrinter.swift; sourceTree = "<group>"; };
 		E0DA42E32BBC484100F82D2D /* swift-bridge.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "swift-bridge.h"; sourceTree = "<group>"; };
 		E0DA42E42BBD4AD900F82D2D /* ReactNativeStarPrinterBridge.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ReactNativeStarPrinterBridge.m; sourceTree = "<group>"; };
-		E0E63C142BC43A7C00333CA3 /* StarIO10.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = StarIO10.xcframework; sourceTree = SOURCE_ROOT; };
+		E0E63D132BC692EA00333CA3 /* StarIO10.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = StarIO10.xcframework; path = libs/StarIO10.xcframework; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -37,7 +38,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E0E63C152BC43A7C00333CA3 /* StarIO10.xcframework in Frameworks */,
+				E0E63D142BC692EA00333CA3 /* StarIO10.xcframework in Frameworks */,
+				E052C54A2BCD707A00B98CA3 /* StarIO10 in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -74,7 +76,7 @@
 		E0E63C132BC43A1600333CA3 /* Framework */ = {
 			isa = PBXGroup;
 			children = (
-				E0E63C142BC43A7C00333CA3 /* StarIO10.xcframework */,
+				E0E63D132BC692EA00333CA3 /* StarIO10.xcframework */,
 			);
 			path = Framework;
 			sourceTree = "<group>";
@@ -96,6 +98,7 @@
 			);
 			name = ReactNativeStarPrinter;
 			packageProductDependencies = (
+				E052C5492BCD707A00B98CA3 /* StarIO10 */,
 			);
 			productName = ReactNativeStarPrinter;
 			productReference = E0DA42D92BBC47E000F82D2D /* libReactNativeStarPrinter.a */;
@@ -127,6 +130,7 @@
 			);
 			mainGroup = E0DA42D02BBC47E000F82D2D;
 			packageReferences = (
+				E052C5482BCD707A00B98CA3 /* XCRemoteSwiftPackageReference "StarXpand-SDK-iOS" */,
 			);
 			productRefGroup = E0DA42DA2BBC47E000F82D2D /* Products */;
 			projectDirPath = "";
@@ -208,6 +212,7 @@
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
+				NEW_SETTING = "";
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
@@ -268,6 +273,7 @@
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
+				NEW_SETTING = "";
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OBJC_BRIDGING_HEADER = "$(SRCROOT)/$(PROJECT)/swift-bridge.h";
@@ -281,6 +287,32 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 4K8YLDV52B;
+				"EXCLUDED_ARCHS[sdk=iphoneos*]" = x86_64;
+				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = arm64;
+				"EXCLUDED_SOURCE_FILE_NAMES[sdk=iphoneos*]" = "$(SRCROOT)/../../node_modules/@wavyapp/react-native-star-prnt/ios/libs/StarIO10.xcframework/ios-arm64_x86_64-simulator/*.*";
+				"EXCLUDED_SOURCE_FILE_NAMES[sdk=iphonesimulator*]" = "$(SRCROOT)/../../node_modules/@wavyapp/react-native-star-prnt/ios/libs/StarIO10.xcframework/ios-arm64/*.*";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(SRCROOT)/libs/**",
+					"$(SRCROOT)/../../node_modules/@wavyapp/react-native-star-prnt/ios/libs/**",
+				);
+				"FRAMEWORK_SEARCH_PATHS[sdk=iphoneos*]" = (
+					"$(SRCROOT)/libs/**",
+					"$(SRCROOT)/../../node_modules/@wavyapp/react-native-star-prnt/ios/libs",
+					"$(SRCROOT)/../../node_modules/@wavyapp/react-native-star-prnt/ios/libs/StarIO10.xcframework/ios-arm64",
+				);
+				"FRAMEWORK_SEARCH_PATHS[sdk=iphonesimulator*]" = (
+					"$(SRCROOT)/libs/**",
+					"$(SRCROOT)/../../node_modules/@wavyapp/react-native-star-prnt/ios/libs",
+					"$(SRCROOT)/../../node_modules/@wavyapp/react-native-star-prnt/ios/libs/StarIO10.xcframework/ios-arm64_x86_64-simulator",
+				);
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
+					"$(SRCROOT)/../../react-native/React/**",
+					"$(SRCROOT)/../../../React/**",
+					"$(SRCROOT)/../node_modules/react-native/**",
+				);
+				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -296,6 +328,21 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 4K8YLDV52B;
+				EXCLUDED_ARCHS = x86_64;
+				EXCLUDED_SOURCE_FILE_NAMES = "$(SRCROOT)/../../node_modules/@wavyapp/react-native-star-prnt/ios/libs/StarIO10.xcframework/ios-arm64_x86_64-simulator/*.*";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(SRCROOT)/libs/**",
+					"$(SRCROOT)/../../node_modules/@wavyapp/react-native-star-prnt/ios/libs",
+					"$(SRCROOT)/../../node_modules/@wavyapp/react-native-star-prnt/ios/libs/StarIO10.xcframework/ios-arm64",
+				);
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
+					"$(SRCROOT)/../../react-native/React/**",
+					"$(SRCROOT)/../../../React/**",
+					"$(SRCROOT)/../node_modules/react-native/**",
+				);
+				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -326,6 +373,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		E052C5482BCD707A00B98CA3 /* XCRemoteSwiftPackageReference "StarXpand-SDK-iOS" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/star-micronics/StarXpand-SDK-iOS";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.6.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		E052C5492BCD707A00B98CA3 /* StarIO10 */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E052C5482BCD707A00B98CA3 /* XCRemoteSwiftPackageReference "StarXpand-SDK-iOS" */;
+			productName = StarIO10;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = E0DA42D12BBC47E000F82D2D /* Project object */;
 }
