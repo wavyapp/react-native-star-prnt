@@ -331,18 +331,17 @@ export class StarPRNT {
    * @return {Observable<any>} Success! if connected or error message string returned by the SDK.
    */
   static connect(port, emulation, hasBarcodeReader) {
-    /**
-     * iOS uses the new SDK StarXPAND
-     * @param {string} port -> identifier Device identifier obtained with the `searchPrinter` method
-     * @param {InterfaceType} emulation -> interfaceType Interface to use to connect to the device
-     */
-    if (Platform.OS === 'ios') {
-      const identifier = port;
-      const interfaceType = emulation;
-      return ReactNativeStarPrinter.connect(identifier, interfaceType);
-    }
     hasBarcodeReader = (hasBarcodeReader) ? true : false;
     return ReactNativeStarPrinter.connect(port, emulation, hasBarcodeReader);
+  }
+
+  /**
+   * iOS uses the new SDK StarXPAND
+   * @param {string} port -> identifier Device identifier obtained with the `searchPrinter` method
+   * @param {InterfaceType} emulation -> interfaceType Interface to use to connect to the device
+   */
+  static connectiOS(identifier, interfaceType) {
+    return ReactNativeStarPrinter.connect(identifier, interfaceType);
   }
 
   /**

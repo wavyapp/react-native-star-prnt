@@ -231,7 +231,7 @@ declare class StarPRNT {
   * @param {string} identifier Device identifier obtained with the `searchPrinter` method
   * @param {InterfaceType} interface Interface to use to connect to the device
   */
-  static connect: (identifier: string, interface: InterfaceType) => Promise<unknown>;
+  static connectiOS: (identifier: string, interface: InterfaceType) => Promise<boolean>;
 
   /**
    * Allows to disconnect (close the connection to the peripherals), this is useful to avoid keeping alive a connection when not in the app to save device battery
@@ -261,7 +261,7 @@ declare class StarPRNT {
   // iOS only
   static displayText: (content: String, backlight?: boolean, contrast?: number, cursorState?: DisplayCursorState, internationalCharacterType?: DisplayInternationalCharacterType) => Promise<boolean>;
   // iOS only
-  static clearDisplay: () => promise<boolean>;
+  static clearDisplay: () => Promise<boolean>;
 }
 
 export enum PrinterEvent {
@@ -829,13 +829,13 @@ export declare enum BitmapConverterRotation {
  */
 export type CommandsArray = PrintCommand[];
 
-export enum InterfaceType {
+export declare enum InterfaceType {
   BLUETOOTH = 'bluetooth',
   BLE = 'BLE',
   LAN = 'lan',
   USB = 'usb',
   unknown = 'unknown',
-};
+}
 
 export type FoundPrinter = {
   "connection-settings": {
@@ -858,7 +858,7 @@ export declare enum PrinterOpenErrorCodes {
   PRINTER_OPEN_BLUETOOTH_UNAVAILABLE = 'PRINTER_OPEN_BLUETOOTH_UNAVAILABLE',
   PRINTER_OPEN_ILLEGAL_DEVICE_STATE = 'PRINTER_OPEN_ILLEGAL_DEVICE_STATE',
   PRINTER_OPEN_UNSUPPORTED_MODEL = 'PRINTER_OPEN_UNSUPPORTED_MODEL',
-};
+}
 
 export type Status = {
   coverOpen: boolean;
@@ -881,19 +881,19 @@ export declare enum PrinterGetStatusErrorCodes {
   PRINTER_GET_STATUS_COMMUNICATION_ERROR = 'PRINTER_GET_STATUS_COMMUNICATION_ERROR',
   PRINTER_GET_STATUS_INVALID_RESPONSE_FROM_PRINTER = 'PRINTER_GET_STATUS_INVALID_RESPONSE_FROM_PRINTER',
   PRINTER_GET_STATUS_NO_PRINTER_CONNECTION = 'PRINTER_GET_STATUS_NO_PRINTER_CONNECTION',
-};
+}
 
 export declare enum PrintDataType {
   text = "text",
   image = "image",
   barcode = "barcode",
-};
+}
 
 export declare enum Align {
   center = "center",
   left = "left",
   right = "right",
-};
+}
 
 export type Style = {
   align?: Align;
@@ -920,7 +920,7 @@ export declare enum PrintAction {
   partialCut = "partial-cut",
   fullDirect = "full-direct", // Full cut without paper feed
   partialDirect = "partial-direct", // Partial cut without paper feed
-};
+}
 
 export declare enum PrintInternationalCharacterType {
   usa = "usa",
@@ -944,7 +944,7 @@ export declare enum PrintInternationalCharacterType {
   vietnam = "vietnam",
   arabic = "arabic",
   legal = "legal",
-};
+}
 
 export declare enum DisplayInternationalCharacterType {
   usa = "usa",
@@ -961,10 +961,10 @@ export declare enum DisplayInternationalCharacterType {
   spain2 = "spain2",
   latinAmerica = "latinAmerica",
   korea = "korea",
-};
+}
 
 export declare enum DisplayCursorState {
   ON = "on",
   OFF = "off",
   BLINK = "blink",
-};
+}
