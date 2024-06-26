@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E04AE5142C2C18F8002C3850 /* PrintCommands.swift in Sources */ = {isa = PBXBuildFile; fileRef = E04AE5132C2C18F8002C3850 /* PrintCommands.swift */; };
+		E04AE5162C2C1993002C3850 /* Display.swift in Sources */ = {isa = PBXBuildFile; fileRef = E04AE5152C2C1993002C3850 /* Display.swift */; };
+		E04AE5182C2C19F6002C3850 /* Characters.swift in Sources */ = {isa = PBXBuildFile; fileRef = E04AE5172C2C19F6002C3850 /* Characters.swift */; };
 		E052C54A2BCD707A00B98CA3 /* StarIO10 in Frameworks */ = {isa = PBXBuildFile; productRef = E052C5492BCD707A00B98CA3 /* StarIO10 */; };
 		E0DA42DD2BBC47E000F82D2D /* ReactNativeStarPrinter.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0DA42DC2BBC47E000F82D2D /* ReactNativeStarPrinter.swift */; };
 		E0DA42E52BBD4AD900F82D2D /* ReactNativeStarPrinterBridge.m in Sources */ = {isa = PBXBuildFile; fileRef = E0DA42E42BBD4AD900F82D2D /* ReactNativeStarPrinterBridge.m */; };
@@ -26,9 +29,11 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		E04AE5132C2C18F8002C3850 /* PrintCommands.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrintCommands.swift; sourceTree = "<group>"; };
+		E04AE5152C2C1993002C3850 /* Display.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Display.swift; sourceTree = "<group>"; };
+		E04AE5172C2C19F6002C3850 /* Characters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Characters.swift; sourceTree = "<group>"; };
 		E0DA42D92BBC47E000F82D2D /* libReactNativeStarPrinter.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libReactNativeStarPrinter.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		E0DA42DC2BBC47E000F82D2D /* ReactNativeStarPrinter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReactNativeStarPrinter.swift; sourceTree = "<group>"; };
-		E0DA42E32BBC484100F82D2D /* swift-bridge.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "swift-bridge.h"; sourceTree = "<group>"; };
 		E0DA42E42BBD4AD900F82D2D /* ReactNativeStarPrinterBridge.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ReactNativeStarPrinterBridge.m; sourceTree = "<group>"; };
 		E0E63D132BC692EA00333CA3 /* StarIO10.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = StarIO10.xcframework; path = libs/StarIO10.xcframework; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
@@ -67,7 +72,9 @@
 			isa = PBXGroup;
 			children = (
 				E0DA42DC2BBC47E000F82D2D /* ReactNativeStarPrinter.swift */,
-				E0DA42E32BBC484100F82D2D /* swift-bridge.h */,
+				E04AE5172C2C19F6002C3850 /* Characters.swift */,
+				E04AE5152C2C1993002C3850 /* Display.swift */,
+				E04AE5132C2C18F8002C3850 /* PrintCommands.swift */,
 				E0DA42E42BBD4AD900F82D2D /* ReactNativeStarPrinterBridge.m */,
 			);
 			path = ReactNativeStarPrinter;
@@ -146,8 +153,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E04AE5142C2C18F8002C3850 /* PrintCommands.swift in Sources */,
 				E0DA42E52BBD4AD900F82D2D /* ReactNativeStarPrinterBridge.m in Sources */,
+				E04AE5162C2C1993002C3850 /* Display.swift in Sources */,
 				E0DA42DD2BBC47E000F82D2D /* ReactNativeStarPrinter.swift in Sources */,
+				E04AE5182C2C19F6002C3850 /* Characters.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

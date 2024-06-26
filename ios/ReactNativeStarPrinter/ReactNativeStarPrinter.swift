@@ -1,54 +1,13 @@
-//
-//  ReactNativeStarPrinter.swift
-//  ReactNativeStarPrinter
-//
-//  Created by Sébastien Vray on 02/04/2024.
-//
-
 import StarIO10
 
-enum PrintAction: String {
-  case cut = "cut"
-  case partialCut = "partial-cut"
-  case fullDirect = "full-direct"
-  case partialDirect = "partial-direct"
-}
-
-enum PrintDataType: String {
-  case text = "text"
-  case image = "image"
-  case barcode = "barcode"
-}
-
-enum Align: String {
-  case center = "center"
-  case left = "left"
-  case right = "right"
-}
-
-struct Style {
-  var align: Align?
-  var barWidth: Int?
-  var bold: Bool?
-  var diffusion: Bool?
-  var threshold: Int?
-  var width: Int?
-  var height: Int?
-  var heightExpansion: Int?
-  var widthExpansion: Int?
-  var underlined: Bool?
-}
-
-struct PrintCommand {
-  var action: PrintAction?
-  var data: String?
-  var style: Style?
-  var type: PrintDataType?
+enum ReactNativeStarPrinterError: Error {
+  case invalidArgument(message: String?)
 }
 
 class PrinterDiscoverer: StarDeviceDiscoveryManagerDelegate {
   private var manager: StarDeviceDiscoveryManager? = nil
   private var lastPromise: (RCTPromiseResolveBlock?, RCTPromiseRejectBlock?) = (nil, nil)
+  private var foundPrinter: StarPrinter? = nil
   
   func interfaceTypeToString(interface: InterfaceType) -> String {
     return switch interface {
@@ -80,12 +39,14 @@ class PrinterDiscoverer: StarDeviceDiscoveryManagerDelegate {
       if errorCode == StarIO10ErrorCode.bluetoothUnavailable {
         // Example of error: Bluetooth capability of iOS device is disabled.
         // This may be due to the host device's Bluetooth being off.
-        reject("PRINTER_SEARCH_ERROR_NO_BLUETOOH", message, nil)
+        reject("PRINTER_SEARCH_ERROR_NO_BLUETOOTH", message, nil)
       } else {
         reject("PRINTER_SEARCH_ERROR", "Error while searching for printer", nil)
       }
+      lastPromise = (nil, nil)
     } catch let error {
       reject("PRINTER_SEARCH_ERROR", "Error while searching for printer", error)
+      lastPromise = (nil, nil)
     }
   }
   
@@ -100,9 +61,15 @@ class PrinterDiscoverer: StarDeviceDiscoveryManagerDelegate {
         "emulation":  String(describing: printer.information?.emulation ?? StarPrinterEmulation.unknown)
       ]
     ])
+    foundPrinter = printer
+    lastPromise = (nil, nil)
   }
   
   func managerDidFinishDiscovery(_ manager: StarDeviceDiscoveryManager) {
+    if (foundPrinter == nil) {
+      lastPromise.1?("PRINTER_SEARCH_NO_PRINTER_AVAILABLE", "StarIO SDK found no printer to connect to", nil)
+      lastPromise = (nil, nil)
+    }
     Swift.print("Printer discovery finished.")
   }
 }
@@ -428,7 +395,7 @@ class ReactNativeStarPrinter: RCTEventEmitter, PrinterDelegate, DrawerDelegate, 
     }
   }
   
-  func setAlignment(command: PrintCommand, printerBuilder: StarXpandCommand.PrinterBuilder) -> Void {
+  func setAlignment(command: Print, printerBuilder: StarXpandCommand.PrinterBuilder) -> Void {
     switch (command.style?.align) {
       case .left:
         _ = printerBuilder.styleAlignment(.left)
@@ -441,55 +408,6 @@ class ReactNativeStarPrinter: RCTEventEmitter, PrinterDelegate, DrawerDelegate, 
     }
   }
   
-  func getPrinterInternationalCharacterType(name: String) -> StarXpandCommand.Printer.InternationalCharacterType {
-    switch name {
-      case "usa":
-        return .usa
-      case "france":
-        return .france
-      case "germany":
-        return .germany
-      case "uk":
-        return .uk
-      case "denmark":
-        return .denmark
-      case "sweden":
-        return .sweden
-      case "italy":
-        return .italy
-      case "spain":
-        return .spain
-      case "japan":
-        return .japan
-      case "norway":
-        return .norway
-      case "denmark2":
-        return .denmark2
-      case "spain2":
-        return .spain2
-      case "latinAmerica":
-        return .latinAmerica
-      case "korea":
-        return .korea
-      case "ireland":
-        return .ireland
-      case "slovenia":
-        return .slovenia
-      case "croatia":
-        return .croatia
-      case "china":
-        return .china
-      case "vietnam":
-        return .vietnam
-      case "arabic":
-        return .arabic
-      case "legal":
-        return .legal
-      default:
-        return .usa
-    }
-  }
-  
   @objc
   func print(
     _ commands: [[String:Any]],
@@ -498,111 +416,110 @@ class ReactNativeStarPrinter: RCTEventEmitter, PrinterDelegate, DrawerDelegate, 
     rejecter reject: @escaping RCTPromiseRejectBlock
   ) {
     if let notNilStarPrinter = starPrinter {
-      let printCommands: [PrintCommand] = commands.map { command in
-        var printCommand = PrintCommand()
-        
-        if let data = command["data"] as? String {
-          printCommand.data = data
-        }
-        if (command["type"] != nil) {
-          printCommand.type = PrintDataType(rawValue: command["type"] as! String)
-        }
-        if (command["action"] != nil) {
-          printCommand.action = PrintAction(rawValue: command["action"] as! String)
-        }
-        if let style = command["style"] as? NSDictionary {
-          printCommand.style = Style()
-          if let align = style["align"] as? String {
-            printCommand.style?.align = Align(rawValue: align)
-          }
-          if let barWidth = style["barWidth"] as? Int {
-            printCommand.style?.barWidth = barWidth
-          }
-          if let bold = style["bold"] as? Bool {
-            printCommand.style?.bold = bold
-          }
-          if let heightExpansion = style["heightExpansion"] as? Int {
-            printCommand.style?.heightExpansion = heightExpansion
-          }
-          if let underlined = style["underlined"] as? Bool {
-            printCommand.style?.underlined = underlined
-          }
-          if let widthExpansion = style["widthExpansion"] as? Int {
-            printCommand.style?.widthExpansion = widthExpansion
-          }
-          if let width = style["width"] as? Int {
-            printCommand.style?.width = width
-          }
-          if let height = style["height"] as? Int {
-            printCommand.style?.height = height
-          }
-          if let threshold = style["threshold"] as? Int {
-            printCommand.style?.threshold = threshold
-          }
-          if let diffusion = style["diffusion"] as? Bool {
-            printCommand.style?.diffusion = diffusion
-          }
-        }
-        return printCommand
-      }
-      
       Task {
         do {
+          let printCommands: [PrinterCommand] = try commands.map { command in
+            return try printerCommandFactory(command)
+          }
           let commandBuilder = StarXpandCommand.StarXpandCommandBuilder()
           let printerBuilder = StarXpandCommand.PrinterBuilder()
           let documentBuilder = StarXpandCommand.DocumentBuilder()
           
-          _ = printerBuilder.styleInternationalCharacter(self.getPrinterInternationalCharacterType(name: charset))
+          _ = printerBuilder.styleInternationalCharacter(getPrinterInternationalCharacterType(name: charset))
           
           for command in printCommands {
-            self.setAlignment(command: command, printerBuilder: printerBuilder)
-            _ = printerBuilder
-              .styleBold(command.style?.bold ?? false)
-              .styleMagnification(
-                StarXpandCommand.MagnificationParameter(
-                  width: (command.style?.widthExpansion ?? 0) + 1,
-                  height: (command.style?.heightExpansion ?? 0) + 1
+            if let printCommand = command as? Print {
+              self.setAlignment(command: printCommand, printerBuilder: printerBuilder)
+              
+              _ = printerBuilder
+                .styleBold(printCommand.style?.bold ?? false)
+                .styleMagnification(
+                  StarXpandCommand.MagnificationParameter(
+                    width: (printCommand.style?.widthExpansion ?? 0) + 1,
+                    height: (printCommand.style?.heightExpansion ?? 0) + 1
+                  )
                 )
-              )
-            
-            if command.type == PrintDataType.text, let data = command.data {
-              _ = printerBuilder.actionPrintText(data)
-            }
-            if (command.action == PrintAction.cut) {
-              _ = printerBuilder.actionCut(.full)
-            }
-            if (command.action == PrintAction.partialCut) {
-              _ = printerBuilder.actionCut(.partial)
-            }
-            if (command.action == PrintAction.fullDirect) {
-              _ = printerBuilder.actionCut(.fullDirect)
-            }
-            if (command.action == PrintAction.partialDirect) {
-              _ = printerBuilder.actionCut(.partialDirect)
-            }
-            if command.type == PrintDataType.image, let url = command.data {
-              if let image = await self.downloadImage(url), let width = command.style?.width {
-                let imageParameter = StarXpandCommand.Printer.ImageParameter(image: image, width: width)
-                if let diffusion = command.style?.diffusion {
-                  _ = imageParameter.setEffectDiffusion(diffusion)
+              
+              if (printCommand.type == PrintDataType.text) {
+                _ = printerBuilder.actionPrintText(printCommand.data)
+              }
+              
+              if (printCommand.type == PrintDataType.image) {
+                if let image = await self.downloadImage(printCommand.data), let width = printCommand.style?.width {
+                  let imageParameter = StarXpandCommand.Printer.ImageParameter(image: image, width: width)
+                  if let diffusion = printCommand.style?.diffusion {
+                    _ = imageParameter.setEffectDiffusion(diffusion)
+                  }
+                  if let threshold = printCommand.style?.threshold {
+                    _ = imageParameter.setThreshold(threshold)
+                  }
+                  _ = printerBuilder.actionPrintImage(imageParameter)
                 }
-                if let threshold = command.style?.threshold {
-                  _ = imageParameter.setThreshold(threshold)
+              }
+              if (printCommand.type == PrintDataType.barcode) {
+                let barcodeParameter = StarXpandCommand.Printer.BarcodeParameter(content: printCommand.data, symbology: .code128).setHeight(Double(printCommand.style?.height ?? 5)).setPrintHRI(true)
+                if let barWidth = printCommand.style?.barWidth {
+                  _ = barcodeParameter.setBarDots(barWidth)
                 }
-                _ = printerBuilder.actionPrintImage(imageParameter)
+                _ = printerBuilder.actionPrintBarcode(barcodeParameter)
               }
             }
-            if command.type == PrintDataType.barcode, let barcodeData = command.data {
-              let barcodeParameter = StarXpandCommand.Printer.BarcodeParameter(content: barcodeData, symbology: .code128).setHeight(Double(command.style?.height ?? 5)).setPrintHRI(true)
-              if let barWidth = command.style?.barWidth {
-                _ = barcodeParameter.setBarDots(barWidth)
+            if let printAction = command as? PrinterAction {
+              if (printAction.action == Action.cut) {
+                _ = printerBuilder.actionCut(.full)
               }
-              _ = printerBuilder.actionPrintBarcode(barcodeParameter)
+              if (printAction.action == Action.partialCut) {
+                _ = printerBuilder.actionCut(.partial)
+              }
+              if (printAction.action == Action.fullDirect) {
+                _ = printerBuilder.actionCut(.fullDirect)
+              }
+              if (printAction.action == Action.partialDirect) {
+                _ = printerBuilder.actionCut(.partialDirect)
+              }
+              if (printAction.action == Action.feedLine) {
+                _ = printerBuilder.actionFeedLine(1)
+              }
+              if (printAction.action == Action.paperFeed) {
+                _ = printerBuilder.actionFeed(Double(printAction.args?["height"] as? Double ?? 1.0))
+              }
+              if (printAction.action == Action.printRuledLine) {
+                let ruledLineWidth: Double = (printAction.args?["width"] as? Double) ?? 48.0
+                let ruledLineParameters = StarXpandCommand.Printer.RuledLineParameter(width: ruledLineWidth)
+                
+                if let thickness = printAction.args?["thickness"] as? Double {
+                  _ = ruledLineParameters.setThickness(thickness)
+                }
+                if let xOffset = printAction.args?["xOffset"] as? Double {
+                  _ = ruledLineParameters.setX(xOffset)
+                }
+                if let lineStyle = printAction.args?["style"] as? String {
+                  if (lineStyle.lowercased() == "double") {
+                    _ = ruledLineParameters.setLineStyle(StarXpandCommand.Printer.LineStyle.double)
+                  }
+                  if (lineStyle.lowercased() == "single") {
+                    _ = ruledLineParameters.setLineStyle(StarXpandCommand.Printer.LineStyle.single)
+                  }
+                }
+                _ = printerBuilder.styleAlignment(StarXpandCommand.Printer.Alignment.center).actionPrintRuledLine(ruledLineParameters)
+                
+              }
             }
           }
           _ = commandBuilder.addDocument(documentBuilder.addPrinter(printerBuilder))
           try await notNilStarPrinter.print(command: commandBuilder.getCommands())
           resolve(true)
+        } catch StarIO10Error.unprintable(message: let message, errorCode: let errorCode, status: _) {
+          switch errorCode {
+            case StarIO10ErrorCode.deviceHasError:
+              reject("PRINTER_PRINT_DEVICE_ERROR", message, nil)
+            case StarIO10ErrorCode.printerHoldingPaper:
+              reject("PRINTER_PRINT_PRINTER_HOLDING_PAPER", message, nil)
+            case StarIO10ErrorCode.printingTimeout:
+              reject("PRINTER_PRINT_PRINTING_TIMEOUT", message, nil)
+            default:
+              reject("PRINTER_PRINT_INVALID_DEVICE_STATUS", message, nil)
+          }
         } catch StarIO10Error.invalidOperation(message: let message, errorCode: _) {
           reject("PRINTER_PRINT_INVALID_OPERATION", message, nil)
         } catch StarIO10Error.communication(message: let message, errorCode: _) {
@@ -610,6 +527,8 @@ class ReactNativeStarPrinter: RCTEventEmitter, PrinterDelegate, DrawerDelegate, 
         } catch StarIO10Error.badResponse(message: let message, errorCode: _) {
           reject("PRINTER_PRINT_INVALID_RESPONSE_FROM_PRINTER", message, nil)
         } catch StarIO10Error.unknown(message: let message, errorCode: _) {
+          reject("PRINTER_PRINT_UNKNOWN_ERROR", message, nil)
+        } catch ReactNativeStarPrinterError.invalidArgument(message: let message) {
           reject("PRINTER_PRINT_UNKNOWN_ERROR", message, nil)
         }
       }
@@ -630,54 +549,6 @@ class ReactNativeStarPrinter: RCTEventEmitter, PrinterDelegate, DrawerDelegate, 
     return nil
   }
   
-  func getDisplayInternationalCharacterType(name: String) -> StarXpandCommand.Display.InternationalCharacterType {
-    switch name {
-      case "usa":
-        return .usa
-      case "france":
-        return .france
-      case "germany":
-        return .germany
-      case "uk":
-        return .uk
-      case "denmark":
-        return .denmark
-      case "sweden":
-        return .sweden
-      case "italy":
-        return .italy
-      case "spain":
-        return .spain
-      case "japan":
-        return .japan
-      case "norway":
-        return .norway
-      case "denmark2":
-        return .denmark2
-      case "spain2":
-        return .spain2
-      case "latinAmerica":
-        return .latinAmerica
-      case "korea":
-        return .korea
-      default:
-        return .usa
-    }
-  }
-  
-  func getDisplayCursorState(name: String) -> StarXpandCommand.Display.CursorState {
-    switch name {
-      case "on":
-        return .on
-      case "off":
-        return .off
-      case "blink":
-        return .blink
-      default:
-        return .off
-    }
-  }
-  
   @objc
   func showTextOnDisplay(
     _ content: String,
@@ -695,14 +566,25 @@ class ReactNativeStarPrinter: RCTEventEmitter, PrinterDelegate, DrawerDelegate, 
           let displayBuilder = StarXpandCommand.DisplayBuilder()
           let documentBuilder = StarXpandCommand.DocumentBuilder()
           
-          _ = displayBuilder.styleInternationalCharacter(self.getDisplayInternationalCharacterType(name: charset))
-            .actionSetCursorState(self.getDisplayCursorState(name: cursorState))
+          _ = displayBuilder.styleInternationalCharacter(getDisplayInternationalCharacterType(name: charset))
+            .actionSetCursorState(getDisplayCursorState(name: cursorState))
             .actionSetBackLightState(backLight)
             .actionSetContrast(StarXpandCommand.Display.Contrast(rawValue: contrast) ?? .default)
             .actionShowText(content)
           _ = commandBuilder.addDocument(documentBuilder.addDisplay(displayBuilder))
           try await notNilStarPrinter.print(command: commandBuilder.getCommands())
           resolve(true)
+        } catch StarIO10Error.unprintable(message: let message, errorCode: let errorCode, status: _) {
+          switch errorCode {
+            case StarIO10ErrorCode.deviceHasError:
+              reject("DISPLAY_SHOW_TEXT_DEVICE_ERROR", message, nil)
+            case StarIO10ErrorCode.printerHoldingPaper:
+              reject("DISPLAY_SHOW_TEXT_PRINTER_HOLDING_PAPER", message, nil)
+            case StarIO10ErrorCode.printingTimeout:
+              reject("DISPLAY_SHOW_TEXT_PRINTING_TIMEOUT", message, nil)
+            default:
+              reject("DISPLAY_SHOW_TEXT_INVALID_DEVICE_STATUS", message, nil)
+          }
         } catch StarIO10Error.invalidOperation(message: let message, errorCode: _) {
           reject("DISPLAY_SHOW_TEXT_INVALID_OPERATION", message, nil)
         } catch StarIO10Error.communication(message: let message, errorCode: _) {
@@ -735,7 +617,18 @@ class ReactNativeStarPrinter: RCTEventEmitter, PrinterDelegate, DrawerDelegate, 
           )
           try await notNilStarPrinter.print(command: commandBuilder.getCommands())
           resolve(true)
-        } catch StarIO10Error.invalidOperation(message: let message, errorCode: _) {
+        } catch StarIO10Error.unprintable(message: let message, errorCode: let errorCode, status: _) {
+          switch errorCode {
+            case StarIO10ErrorCode.deviceHasError:
+              reject("DISPLAY_CLEAR_DEVICE_ERROR", message, nil)
+            case StarIO10ErrorCode.printerHoldingPaper:
+              reject("DISPLAY_CLEAR_PRINTER_HOLDING_PAPER", message, nil)
+            case StarIO10ErrorCode.printingTimeout:
+              reject("DISPLAY_CLEAR_PRINTING_TIMEOUT", message, nil)
+            default:
+              reject("DISPLAY_CLEAR_INVALID_DEVICE_STATUS", message, nil)
+          }
+        }  catch StarIO10Error.invalidOperation(message: let message, errorCode: _) {
           reject("DISPLAY_CLEAR_INVALID_OPERATION", message, nil)
         } catch StarIO10Error.communication(message: let message, errorCode: _) {
           reject("DISPLAY_CLEAR_COMMUNICATION_ERROR", message, nil)
@@ -761,6 +654,8 @@ class ReactNativeStarPrinter: RCTEventEmitter, PrinterDelegate, DrawerDelegate, 
         resolve(true)
         starPrinter = nil
       }
+    } else {
+      resolve(true)
     }
   }
 }
