@@ -6,9 +6,9 @@ enum ReactNativeStarPrinterError: Error {
 
 class PrinterDiscoverer: StarDeviceDiscoveryManagerDelegate {
   private var manager: StarDeviceDiscoveryManager? = nil
-  private var lastPromise: (RCTPromiseResolveBlock?, RCTPromiseRejectBlock?) = (nil, nil)
+  private var discoverPromises: [(RCTPromiseResolveBlock, RCTPromiseRejectBlock, Bool)] = []
   private var foundPrinter: StarPrinter? = nil
-  
+
   func interfaceTypeToString(interface: InterfaceType) -> String {
     return switch interface {
       case .lan:
@@ -23,18 +23,18 @@ class PrinterDiscoverer: StarDeviceDiscoveryManagerDelegate {
         "unkown"
     }
   }
-  
+
   func discover(
     _ resolve: @escaping RCTPromiseResolveBlock,
     rejecter reject: @escaping RCTPromiseRejectBlock
   ) {
     do {
-      lastPromise = (resolve as RCTPromiseResolveBlock, reject as RCTPromiseRejectBlock)
       manager?.stopDiscovery()
       try manager = StarDeviceDiscoveryManagerFactory.create(interfaceTypes: [InterfaceType.bluetooth, InterfaceType.bluetoothLE, InterfaceType.lan, InterfaceType.usb])
       manager?.discoveryTime = 10000
       manager?.delegate = self
       try manager?.startDiscovery()
+      discoverPromises.append((resolve as RCTPromiseResolveBlock, reject as RCTPromiseRejectBlock, false))
     } catch StarIO10Error.illegalDeviceState(message: let message, errorCode: let errorCode) {
       if errorCode == StarIO10ErrorCode.bluetoothUnavailable {
         // Example of error: Bluetooth capability of iOS device is disabled.
@@ -43,32 +43,40 @@ class PrinterDiscoverer: StarDeviceDiscoveryManagerDelegate {
       } else {
         reject("PRINTER_SEARCH_ERROR", "Error while searching for printer", nil)
       }
-      lastPromise = (nil, nil)
     } catch let error {
       reject("PRINTER_SEARCH_ERROR", "Error while searching for printer", error)
-      lastPromise = (nil, nil)
     }
   }
-  
+
   func manager(_ manager: StarDeviceDiscoveryManager, didFind printer: StarPrinter) {
-    lastPromise.0?([
-      "connection-settings": [
-        "identifier": printer.connectionSettings.identifier,
-        "interface": self.interfaceTypeToString(interface: printer.connectionSettings.interfaceType)
-      ],
-      "information": [
-        "model": String(describing: printer.information?.model ?? StarPrinterModel.unknown),
-        "emulation":  String(describing: printer.information?.emulation ?? StarPrinterEmulation.unknown)
-      ]
-    ])
+    for (index, promise) in discoverPromises.enumerated() {
+      let (resolve, _, resolved) = promise
+      if (!resolved) {
+        resolve([
+          "connection-settings": [
+            "identifier": printer.connectionSettings.identifier,
+            "interface": self.interfaceTypeToString(interface: printer.connectionSettings.interfaceType)
+          ],
+          "information": [
+            "model": String(describing: printer.information?.model ?? StarPrinterModel.unknown),
+            "emulation":  String(describing: printer.information?.emulation ?? StarPrinterEmulation.unknown)
+          ]
+        ])
+        discoverPromises[index].2 = true
+      }
+    }
     foundPrinter = printer
-    lastPromise = (nil, nil)
   }
-  
+
   func managerDidFinishDiscovery(_ manager: StarDeviceDiscoveryManager) {
     if (foundPrinter == nil) {
-      lastPromise.1?("PRINTER_SEARCH_NO_PRINTER_AVAILABLE", "StarIO SDK found no printer to connect to", nil)
-      lastPromise = (nil, nil)
+      for (index, promise) in discoverPromises.enumerated() {
+        let (_, reject, resolved) = promise
+        if (!resolved) {
+          reject("PRINTER_SEARCH_NO_PRINTER_AVAILABLE", "StarIO SDK found no printer to connect to", nil)
+          discoverPromises[index].2 = true
+        }
+      }
     }
     Swift.print("Printer discovery finished.")
   }
@@ -79,11 +87,11 @@ class ReactNativeStarPrinter: RCTEventEmitter, PrinterDelegate, DrawerDelegate, 
   var RNStarPrnt_hasListeners = false
   let printerDiscoverer = PrinterDiscoverer()
   var starPrinter: StarPrinter? = nil
-  
+
   override init() {
     super.init()
   }
-  
+
   deinit {
     if (starPrinter != nil) {
       Task { [starPrinter] in
@@ -91,19 +99,19 @@ class ReactNativeStarPrinter: RCTEventEmitter, PrinterDelegate, DrawerDelegate, 
       }
     }
   }
-  
+
   @objc
   override static func requiresMainQueueSetup() -> Bool {
     return true
   }
-  
+
   @objc
   override var methodQueue: DispatchQueue {
     get {
       return DispatchQueue(label: "fr.wavy.x.react-native-star-printer")
     }
   }
-  
+
   override func supportedEvents() -> [String]!
   {
     return [
@@ -127,61 +135,61 @@ class ReactNativeStarPrinter: RCTEventEmitter, PrinterDelegate, DrawerDelegate, 
       "printerCoverClosed"
     ]
   }
-  
+
   func printer(_ printer: StarPrinter, communicationErrorDidOccur error: Error) {
     if (RNStarPrnt_hasListeners) {
       sendEvent(withName: "printerCommunicationError", body: error.localizedDescription)
     }
   }
-  
+
   func printerIsReady(_ printer: StarPrinter) {
     if (RNStarPrnt_hasListeners) {
       sendEvent(withName: "printerIsReady", body: nil)
     }
   }
-  
+
   func printerDidHaveError(_ printer: StarPrinter) {
     if (RNStarPrnt_hasListeners) {
       sendEvent(withName: "printerHasError", body: nil)
     }
   }
-  
+
   func printerIsPaperReady(_ printer: StarPrinter) {
     if (RNStarPrnt_hasListeners) {
       sendEvent(withName: "printerPaperIsReady", body: nil)
     }
   }
-  
+
   func printerIsPaperNearEmpty(_ printer: StarPrinter) {
     if (RNStarPrnt_hasListeners) {
       sendEvent(withName: "printerPaperIsNearEmpty", body: nil)
     }
   }
-  
+
   func printerIsPaperEmpty(_ printer: StarPrinter) {
     if (RNStarPrnt_hasListeners) {
       sendEvent(withName: "printerPaperIsEmpty", body: nil)
     }
   }
-  
+
   func printerIsCoverOpen(_ printer: StarPrinter) {
     if (RNStarPrnt_hasListeners) {
       sendEvent(withName: "printerCoverOpened", body: nil)
     }
   }
-  
+
   func printerIsCoverClose(_ printer: StarPrinter) {
     if (RNStarPrnt_hasListeners) {
       sendEvent(withName: "printerCoverClosed", body: nil)
     }
   }
-  
+
   func drawer(printer: StarPrinter, communicationErrorDidOccur error: Error) {
     if (RNStarPrnt_hasListeners) {
       sendEvent(withName: "printerDrawerCommunicationError", body: error.localizedDescription)
     }
   }
-  
+
   func drawer(printer: StarPrinter, didSwitch openCloseSignal: Bool) {
     if (RNStarPrnt_hasListeners) {
       if (openCloseSignal) {
@@ -191,65 +199,63 @@ class ReactNativeStarPrinter: RCTEventEmitter, PrinterDelegate, DrawerDelegate, 
       }
     }
   }
-  
+
   func inputDevice(printer: StarPrinter, communicationErrorDidOccur error: Error) {
     if (RNStarPrnt_hasListeners) {
       sendEvent(withName: "inputDeviceCommunicationError", body: error.localizedDescription)
     }
   }
-  
+
   func inputDeviceDidConnect(printer: StarPrinter) {
     if (RNStarPrnt_hasListeners) {
       sendEvent(withName: "inputDeviceConnected", body: nil)
     }
   }
-  
+
   func inputDeviceDidDisconnect(printer: StarPrinter) {
     if (RNStarPrnt_hasListeners) {
       sendEvent(withName: "inputDeviceDisconnected", body: nil)
     }
   }
-  
+
   func inputDevice(printer: StarPrinter, didReceive data: Data) {
-    Swift.print("Input device red data")
     if (RNStarPrnt_hasListeners) {
-      Swift.print("Sending read data event")
       sendEvent(withName: "inputDeviceReadData", body: String(decoding: data, as: UTF8.self))
     }
   }
-  
+
   func display(printer: StarPrinter, communicationErrorDidOccur error: Error) {
     if (RNStarPrnt_hasListeners) {
       sendEvent(withName: "displayCommunicationError", body: error.localizedDescription)
     }
   }
-  
+
   func displayDidConnect(printer: StarPrinter) {
     if (RNStarPrnt_hasListeners) {
       sendEvent(withName: "displayConnected", body: nil)
     }
   }
-  
+
   func displayDidDisconnect(printer: StarPrinter) {
     if (RNStarPrnt_hasListeners) {
       sendEvent(withName: "displayDisconnected", body: nil)
     }
   }
-  
+
   // Will be called when this module's first listener is added.
   @objc
   override func startObserving() {
     self.RNStarPrnt_hasListeners = true
     // Set up any upstream listeners or background tasks as necessary
   }
-  
+
   // Will be called when this module's last listener is removed, or on dealloc.
   @objc
   func StopObserving() {
     self.RNStarPrnt_hasListeners = false
     // Remove upstream listeners, stop unnecessary background tasks
   }
-  
+
   @objc
   func searchPrinter(
     _ resolve: @escaping RCTPromiseResolveBlock,
@@ -257,7 +263,7 @@ class ReactNativeStarPrinter: RCTEventEmitter, PrinterDelegate, DrawerDelegate, 
   ) {
     printerDiscoverer.discover(resolve, rejecter: reject);
   }
-  
+
   func stringToInterfaceType(interface: String) -> InterfaceType {
     return switch interface {
       case "lan":
@@ -272,7 +278,7 @@ class ReactNativeStarPrinter: RCTEventEmitter, PrinterDelegate, DrawerDelegate, 
         InterfaceType.unknown
     }
   }
-  
+
   @objc
   func connect(
     _ identifier: String,
@@ -323,7 +329,7 @@ class ReactNativeStarPrinter: RCTEventEmitter, PrinterDelegate, DrawerDelegate, 
       }
     }
   }
-  
+
   @objc
   func getStatus(
     _ resolve: @escaping RCTPromiseResolveBlock,
@@ -333,7 +339,7 @@ class ReactNativeStarPrinter: RCTEventEmitter, PrinterDelegate, DrawerDelegate, 
       Task {
         do {
           let status = try await notNilStarPrinter.getStatus()
-          
+
           resolve([
             "hasError": status.hasError,
             "coverOpen": status.coverOpen,
@@ -361,7 +367,7 @@ class ReactNativeStarPrinter: RCTEventEmitter, PrinterDelegate, DrawerDelegate, 
       reject("PRINTER_GET_STATUS_NO_PRINTER_CONNECTION", "Not connected to any printer", nil)
     }
   }
-  
+
   @objc
   func openCashDrawer(
     _ resolve: @escaping RCTPromiseResolveBlock,
@@ -394,7 +400,7 @@ class ReactNativeStarPrinter: RCTEventEmitter, PrinterDelegate, DrawerDelegate, 
       reject("PRINTER_OPEN_DRAWER_NO_PRINTER_CONNECTION", "Not connected to any printer", nil)
     }
   }
-  
+
   func setAlignment(command: Print, printerBuilder: StarXpandCommand.PrinterBuilder) -> Void {
     switch (command.style?.align) {
       case .left:
@@ -407,7 +413,7 @@ class ReactNativeStarPrinter: RCTEventEmitter, PrinterDelegate, DrawerDelegate, 
         break
     }
   }
-  
+
   @objc
   func print(
     _ commands: [[String:Any]],
@@ -424,13 +430,13 @@ class ReactNativeStarPrinter: RCTEventEmitter, PrinterDelegate, DrawerDelegate, 
           let commandBuilder = StarXpandCommand.StarXpandCommandBuilder()
           let printerBuilder = StarXpandCommand.PrinterBuilder()
           let documentBuilder = StarXpandCommand.DocumentBuilder()
-          
+
           _ = printerBuilder.styleInternationalCharacter(getPrinterInternationalCharacterType(name: charset))
-          
+
           for command in printCommands {
             if let printCommand = command as? Print {
               self.setAlignment(command: printCommand, printerBuilder: printerBuilder)
-              
+
               _ = printerBuilder
                 .styleBold(printCommand.style?.bold ?? false)
                 .styleMagnification(
@@ -439,11 +445,11 @@ class ReactNativeStarPrinter: RCTEventEmitter, PrinterDelegate, DrawerDelegate, 
                     height: (printCommand.style?.heightExpansion ?? 0) + 1
                   )
                 )
-              
+
               if (printCommand.type == PrintDataType.text) {
                 _ = printerBuilder.actionPrintText(printCommand.data)
               }
-              
+
               if (printCommand.type == PrintDataType.image) {
                 if let image = await self.downloadImage(printCommand.data), let width = printCommand.style?.width {
                   let imageParameter = StarXpandCommand.Printer.ImageParameter(image: image, width: width)
@@ -486,7 +492,7 @@ class ReactNativeStarPrinter: RCTEventEmitter, PrinterDelegate, DrawerDelegate, 
               if (printAction.action == Action.printRuledLine) {
                 let ruledLineWidth: Double = (printAction.args?["width"] as? Double) ?? 48.0
                 let ruledLineParameters = StarXpandCommand.Printer.RuledLineParameter(width: ruledLineWidth)
-                
+
                 if let thickness = printAction.args?["thickness"] as? Double {
                   _ = ruledLineParameters.setThickness(thickness)
                 }
@@ -502,7 +508,6 @@ class ReactNativeStarPrinter: RCTEventEmitter, PrinterDelegate, DrawerDelegate, 
                   }
                 }
                 _ = printerBuilder.styleAlignment(StarXpandCommand.Printer.Alignment.center).actionPrintRuledLine(ruledLineParameters)
-                
               }
             }
           }
@@ -536,7 +541,7 @@ class ReactNativeStarPrinter: RCTEventEmitter, PrinterDelegate, DrawerDelegate, 
       reject("PRINTER_PRINT_NO_PRINTER_CONNECTION", "Not connected to any printer", nil)
     }
   }
-  
+
   func downloadImage(_ from: String) async -> UIImage? {
     if let url = URL(string: from) {
       do {
@@ -548,7 +553,7 @@ class ReactNativeStarPrinter: RCTEventEmitter, PrinterDelegate, DrawerDelegate, 
     }
     return nil
   }
-  
+
   @objc
   func showTextOnDisplay(
     _ content: String,
@@ -565,7 +570,7 @@ class ReactNativeStarPrinter: RCTEventEmitter, PrinterDelegate, DrawerDelegate, 
           let commandBuilder = StarXpandCommand.StarXpandCommandBuilder()
           let displayBuilder = StarXpandCommand.DisplayBuilder()
           let documentBuilder = StarXpandCommand.DocumentBuilder()
-          
+
           _ = displayBuilder.styleInternationalCharacter(getDisplayInternationalCharacterType(name: charset))
             .actionSetCursorState(getDisplayCursorState(name: cursorState))
             .actionSetBackLightState(backLight)
@@ -599,7 +604,7 @@ class ReactNativeStarPrinter: RCTEventEmitter, PrinterDelegate, DrawerDelegate, 
       reject("DISPLAY_SHOW_TEXT_NO_PRINTER_CONNECTION", "Not connected to any printer", nil)
     }
   }
-  
+
   @objc
   func clearDisplay(
     _ resolve: @escaping RCTPromiseResolveBlock,
@@ -609,7 +614,7 @@ class ReactNativeStarPrinter: RCTEventEmitter, PrinterDelegate, DrawerDelegate, 
       Task {
         do {
           let commandBuilder = StarXpandCommand.StarXpandCommandBuilder()
-          
+
           _ = commandBuilder.addDocument(
             StarXpandCommand.DocumentBuilder().addDisplay(
               StarXpandCommand.DisplayBuilder().actionClearAll()
@@ -642,7 +647,7 @@ class ReactNativeStarPrinter: RCTEventEmitter, PrinterDelegate, DrawerDelegate, 
       reject("DISPLAY_CLEAR_NO_PRINTER_CONNECTION", "Not connected to any printer", nil)
     }
   }
-  
+
   @objc
   func disconnect(
     _ resolve: @escaping RCTPromiseResolveBlock,

@@ -247,7 +247,7 @@ class ReactStarPrinterModule(private val reactContext: ReactApplicationContext) 
   fun searchPrinter(promise: Promise) {
     starPrinterCoroutineScope.launch {
       if (maybeRequestBluetoothPermissions() == PackageManager.PERMISSION_DENIED) {
-        promise.reject("PRINTER_SEARCH_ERROR_NO_BLUETOOTH", "User did not grant permission to use device's bluetooth")
+        promise.reject("PRINTER_SEARCH_ERROR_BLUETOOTH_PERMISSION_DENIED", "User did not grant permission to use device's bluetooth")
         return@launch
       }
       try {

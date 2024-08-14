@@ -198,4 +198,9 @@ export declare enum DisplayCursorState {
     OFF = "off",
     BLINK = "blink"
 }
+export declare enum PrinterSearchErrorCodes {
+    PRINTER_SEARCH_ERROR_NO_BLUETOOTH = "PRINTER_SEARCH_ERROR_NO_BLUETOOTH",
+    PRINTER_SEARCH_ERROR = "PRINTER_SEARCH_ERROR",
+    PRINTER_SEARCH_ERROR_BLUETOOTH_PERMISSION_DENIED = "PRINTER_SEARCH_ERROR_BLUETOOTH_PERMISSION_DENIED"
+}
 //# sourceMappingURL=index.d.ts.map
