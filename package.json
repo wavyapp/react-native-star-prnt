@@ -1,6 +1,6 @@
 {
   "name": "@wavyapp/react-native-star-prnt",
-  "version": "4.1.1",
+  "version": "4.1.2",
   "description": "React Native module for Star Micronics Bluetooth/LAN printers",
   "author": "Sebastien Vray <sebastien.vray@treatwell.com>",
   "license": "MIT",
