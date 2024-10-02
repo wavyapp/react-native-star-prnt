@@ -40,23 +40,18 @@ Pod::Spec.new do |s|
     end
   end
 
-  s.pod_target_xcconfig = { 
+  s.pod_target_xcconfig = {
     'EXCLUDED_ARCHS[sdk=iphoneos*]' => 'x86_64',
     'EXCLUDED_SOURCE_FILE_NAMES[sdk=iphoneos*]' => '$(SRCROOT)/../../node_modules/@wavyapp/react-native-star-prnt/ios/libs/StarIO10.xcframework/ios-arm64_x86_64-simulator/*.*',
     'FRAMEWORK_SEARCH_PATHS[sdk=iphoneos*]' => '$(SRCROOT)/** $(SRCROOT)/../../node_modules/@wavyapp/react-native-star-prnt/libs/ios $(SRCROOT)/../../node_modules/@wavyapp/react-native-star-prnt/ios/libs/StarIO10.xcframework/ios-arm64',
   }
-  
-  if ENV['USE_FRAMEWORKS']
-    header_search_path = [
-      '$(SRCROOT)/../../node_modules/react/** $(SRCROOT)/../../node_modules/react-native/**'
-    ]
 
+  if ENV['USE_FRAMEWORKS']
     exclude_source_file_name = [
       'libs/StarIO10.xcframework/ios-arm64_x86_64-simulator/StarIO10.framework/Headers/*.h libs/StarIO10.xcframework/ios-arm64_x86_64-simulator/StarIO10.framework/PrivateHeaders/*.h'
     ]
 
     s.pod_target_xcconfig  = {
-      "HEADER_SEARCH_PATHS" => header_search_path.join(" "),
       "EXCLUDED_SOURCE_FILE_NAMES" => exclude_source_file_name.join(" ")
     }
   end
