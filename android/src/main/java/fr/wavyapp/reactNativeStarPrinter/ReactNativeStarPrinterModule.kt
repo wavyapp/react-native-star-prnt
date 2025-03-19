@@ -52,9 +52,6 @@ import com.starmicronics.stario10.starxpandcommand.printer.BarcodeSymbology
 import com.starmicronics.stario10.starxpandcommand.printer.ImageParameter
 import com.starmicronics.stario10.starxpandcommand.printer.LineStyle
 import com.starmicronics.stario10.starxpandcommand.printer.RuledLineParameter
-import java.io.IOException
-import java.net.MalformedURLException
-import java.net.URL
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -63,6 +60,10 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.IOException
+import java.net.MalformedURLException
+import java.net.URL
+import java.util.concurrent.atomic.AtomicInteger
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -94,6 +95,9 @@ class ReactStarPrinterModule(private val reactContext: ReactApplicationContext) 
   private var discoveryManager: StarDeviceDiscoveryManager? = null
   private var listeners = 0
   private var starPrinter: StarPrinter? = null
+
+  private val mNextLocalRequestCode = AtomicInteger()
+
   private val starPrinterCoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
   private val printerDelegate = object : PrinterDelegate() {
     override fun onCommunicationError(e: StarIO10Exception) {
@@ -226,7 +230,7 @@ class ReactStarPrinterModule(private val reactContext: ReactApplicationContext) 
       } else {
         return suspendCoroutine { continuation ->
           val requestPermissionActivity = activity.activityResultRegistry.register(
-            "CallWithPermission_${Manifest.permission.BLUETOOTH_CONNECT}",
+            "rnStarPrinter_request#" + mNextLocalRequestCode.getAndIncrement(),
             ActivityResultContracts.RequestPermission()
           ) { result ->
             if (result) {
